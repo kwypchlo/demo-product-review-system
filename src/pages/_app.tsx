@@ -17,7 +17,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <Head>
         <title>Ecommerce Review App</title>
         <meta name="description" content="Task for Consesnsys" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" />
       </Head>
       <ChakraProvider>
         <SessionProvider session={session}>
