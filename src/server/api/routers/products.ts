@@ -5,9 +5,34 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/
 import { products, reviews } from "@/server/db/schema";
 
 export const productsRouter = createTRPCRouter({
-  getProducts: publicProcedure.query(({ ctx }) => {
-    return ctx.db.query.products.findMany();
-  }),
+  getProducts: publicProcedure
+    .input(
+      z.object({
+        orderBy: z.object({
+          field: z.enum(["name", "rating", "reviewCount"]),
+          direction: z.enum(["asc", "desc"]),
+        }),
+        filterBy: z.enum(["4stars", "3stars"]).optional(),
+      }),
+    )
+    .query(({ ctx, input }) => {
+      return ctx.db.query.products.findMany({
+        orderBy: (products, { asc, desc }) => {
+          const dir = input.orderBy.direction === "asc" ? asc : desc;
+
+          return [dir(products[input.orderBy.field])];
+        },
+        where: (products, { gte }) => {
+          if (input.filterBy === "4stars") {
+            return gte(products.rating, 4);
+          }
+
+          if (input.filterBy === "3stars") {
+            return gte(products.rating, 3);
+          }
+        },
+      });
+    }),
 
   getProductById: publicProcedure.input(z.object({ id: z.string().uuid() })).query(({ ctx, input: { id } }) => {
     return ctx.db.query.products.findFirst({
@@ -31,63 +56,6 @@ export const productsRouter = createTRPCRouter({
       with: {
         author: true,
       },
-    });
-  }),
-
-  createReview: protectedProcedure
-    .input(
-      z.object({
-        productId: z.string().uuid(),
-        content: z.string().min(1),
-        rating: z.number().int().min(1).max(5),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db.transaction(async (db) => {
-        await db.insert(reviews).values({
-          content: input.content,
-          rating: input.rating,
-          productId: input.productId,
-          authorId: ctx.session.user.id,
-        });
-
-        await db
-          .update(products)
-          .set({
-            reviewCount: sql`${products.reviewCount} + 1`,
-            rating: sql`${db
-              .select({ rating: sql`AVG(${reviews.rating})` })
-              .from(reviews)
-              .where(eq(reviews.productId, input.productId))}`,
-          })
-          .where(eq(products.id, input.productId));
-      });
-    }),
-
-  deleteReview: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-    await ctx.db.transaction(async (db) => {
-      const deletedReviews = await db
-        .delete(reviews)
-        .where(and(eq(reviews.id, input.id), eq(reviews.authorId, ctx.session.user.id)))
-        .returning();
-
-      if (!deletedReviews.length) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Review not found",
-        });
-      }
-
-      await db
-        .update(products)
-        .set({
-          reviewCount: sql`${products.reviewCount} - 1`,
-          rating: sql`${db
-            .select({ rating: sql`AVG(${reviews.rating})` })
-            .from(reviews)
-            .where(eq(reviews.productId, deletedReviews[0]!.productId))}`,
-        })
-        .where(eq(products.id, deletedReviews[0]!.productId));
     });
   }),
 });

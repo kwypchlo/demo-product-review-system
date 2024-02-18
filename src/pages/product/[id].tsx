@@ -1,7 +1,9 @@
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import { Divider, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import { StarIcon } from "@heroicons/react/20/solid";
 import classNames from "classnames";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { Fragment } from "react";
 import Review from "@/components/Review";
 import ReviewForm from "@/components/ReviewForm";
 import { api } from "@/utils/api";
@@ -38,9 +40,14 @@ const license = {
 
 export default function Example() {
   const router = useRouter();
+  const session = useSession();
   const { data: product, isLoading } = api.products.getProductById.useQuery(
     { id: router.query.id as string },
     { enabled: router.isReady },
+  );
+  const { data: myReviews } = api.reviews.getMyProductReviews.useQuery(
+    { productId: router.query.id as string },
+    { enabled: router.isReady && session.status === "authenticated" },
   );
 
   if (isLoading) return <div>Loading...</div>;
@@ -105,17 +112,6 @@ export default function Example() {
           </button>
         </div>
 
-        {/* <div className="mt-10 border-t border-gray-200 pt-10">
-          <h3 className="text-sm font-medium text-gray-900">Highlights</h3>
-          <div className="prose prose-sm mt-4 text-gray-500">
-            <ul role="list">
-              {product.tags.map((tag) => (
-                <li key={tag}>{tag}</li>
-              ))}
-            </ul>
-          </div>
-        </div> */}
-
         <div className="mt-10 border-t border-gray-200 pt-10">
           <h3 className="text-sm font-medium text-gray-900">License</h3>
           <p className="mt-4 text-sm text-gray-500">
@@ -169,20 +165,27 @@ export default function Example() {
         <Tabs>
           <TabList>
             <Tab>Latest Reviews</Tab>
-            <Tab>Submit Your Review</Tab>
+            <Tab>{!myReviews?.length && "Submit"} Your Review</Tab>
           </TabList>
 
           <TabPanels>
             <TabPanel>
               <h3 className="sr-only">Latest Reviews</h3>
-              {product.reviews.map((review) => (
-                <Review key={review.id} review={review} />
+              {product.reviews.map((review, reviewIdx) => (
+                <Fragment key={review.id}>
+                  <Review review={review} />
+                  {reviewIdx < product.reviews.length - 1 && <Divider />}
+                </Fragment>
               ))}
             </TabPanel>
             <TabPanel>
               <h3 className="sr-only">Submit Your Review</h3>
 
-              <ReviewForm productId={product.id} />
+              {myReviews && myReviews.length > 0 ? (
+                <Review review={myReviews[0]!} />
+              ) : (
+                <ReviewForm productId={product.id} />
+              )}
             </TabPanel>
           </TabPanels>
         </Tabs>

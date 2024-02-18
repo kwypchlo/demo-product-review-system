@@ -1,5 +1,6 @@
 import { Avatar, Button, Container, Flex, IconButton, Stack, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import Image from "next/image";
+import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { FiMoon, FiSun } from "react-icons/fi";
 
@@ -10,7 +11,9 @@ export default function Navigation() {
   return (
     <Flex bg={useColorModeValue("gray.100", "gray.900")} px={4} justifyContent="center">
       <Container as={Flex} h={16} alignItems={"center"} justifyContent={"space-between"} maxW="7xl" w="full" gap={4}>
-        <Image src="/favicon.svg" alt="Product Review System Logo" width={36} height={36} />
+        <Link href="/">
+          <Image src="/favicon.svg" alt="Product Review System Logo" width={36} height={36} />
+        </Link>
 
         <Stack direction={"row"} spacing={4} alignItems={"center"}>
           <IconButton

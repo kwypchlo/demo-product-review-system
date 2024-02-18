@@ -11,10 +11,10 @@ export default function Layout({ children }: PropsWithChildren) {
       </nav>
 
       <Flex minH="full" w="full" justifyContent="center">
-        <Container maxW="7xl" w="full" flexDirection="column" gap={4}>
-          <header>
+        <Container maxW="7xl" w="full">
+          {/* <header>
             <Breadcrumbs />
-          </header>
+          </header> */}
           <main>{children}</main>
         </Container>
       </Flex>

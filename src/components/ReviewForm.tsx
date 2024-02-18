@@ -33,10 +33,11 @@ export default function ReviewForm({ productId }: { productId: string }) {
     },
   });
 
-  const { mutate, isLoading } = api.products.createReview.useMutation({
+  const { mutate, isLoading } = api.reviews.createReview.useMutation({
     onSuccess: () => {
       void utils.products.getProductById.invalidate({ id: productId });
       void utils.products.getProductReviews.invalidate({ productId });
+      void utils.reviews.getMyProductReviews.invalidate({ productId });
 
       toast({ title: "Your review has been submitted.", status: "success" });
 
