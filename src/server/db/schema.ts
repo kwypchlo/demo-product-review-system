@@ -20,9 +20,7 @@ import { type AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = pgTableCreator(
-  (name) => `product-review-system_${name}`,
-);
+export const createTable = pgTableCreator((name) => `product-review-system_${name}`);
 
 export const posts = createTable(
   "post",
@@ -63,9 +61,7 @@ export const accounts = createTable(
     userId: varchar("userId", { length: 255 })
       .notNull()
       .references(() => users.id),
-    type: varchar("type", { length: 255 })
-      .$type<AdapterAccount["type"]>()
-      .notNull(),
+    type: varchar("type", { length: 255 }).$type<AdapterAccount["type"]>().notNull(),
     provider: varchar("provider", { length: 255 }).notNull(),
     providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
     refresh_token: text("refresh_token"),
@@ -91,9 +87,7 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 export const sessions = createTable(
   "session",
   {
-    sessionToken: varchar("sessionToken", { length: 255 })
-      .notNull()
-      .primaryKey(),
+    sessionToken: varchar("sessionToken", { length: 255 }).notNull().primaryKey(),
     userId: varchar("userId", { length: 255 })
       .notNull()
       .references(() => users.id),
@@ -151,10 +145,7 @@ export const reviews = createTable(
   },
   (reviews) => ({
     // unique index to ensure that a user can only review a product only once
-    productAuthorUniqueIdx: unique("product_author_unique_idx").on(
-      reviews.productId,
-      reviews.authorId,
-    ),
+    productAuthorUniqueIdx: unique("product_author_unique_idx").on(reviews.productId, reviews.authorId),
   }),
 );
 

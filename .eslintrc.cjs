@@ -41,10 +41,7 @@ const config = {
       },
     ],
     "sort-imports": ["error", { ignoreDeclarationSort: true }],
-    "import/order": [
-      "error",
-      { alphabetize: { order: "asc" }, "newlines-between": "never" },
-    ],
+    "import/order": ["error", { alphabetize: { order: "asc" }, "newlines-between": "never" }],
     "import/newline-after-import": "error",
   },
 };

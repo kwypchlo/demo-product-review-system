@@ -1,13 +1,8 @@
-import {
-  Button,
-  Flex,
-  FormHelperText,
-  Input,
-  Textarea,
-} from "@chakra-ui/react";
+import { Button, Flex, Textarea } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Rating } from "@smastrom/react-rating";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
+import { AiOutlineSend } from "react-icons/ai";
 import { z } from "zod";
 import { api } from "@/utils/api";
 
@@ -37,7 +32,7 @@ export default function ReviewForm({ productId }: { productId: string }) {
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
     defaultValues: {
-      rating: 5,
+      rating: 0,
     },
   });
 
@@ -51,7 +46,7 @@ export default function ReviewForm({ productId }: { productId: string }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Flex direction="column" gap={4}>
+      <Flex direction="column" gap={4} py={4}>
         <Flex alignItems="center" gap={4}>
           <Controller
             control={control}
@@ -72,17 +67,16 @@ export default function ReviewForm({ productId }: { productId: string }) {
           Select your rating
         </Flex>
 
-        <Textarea
-          placeholder="Write your review here"
-          {...register("content")}
-        />
+        <Textarea placeholder="Write your review here" {...register("content")} />
 
         {/* errors will return when field validation fails  */}
         {errors.content && <span>This field is required</span>}
 
-        <Button type="submit" isLoading={isLoading}>
-          Submit
-        </Button>
+        <Flex justifyContent={"flex-end"}>
+          <Button type="submit" isLoading={isLoading} colorScheme="green" leftIcon={<AiOutlineSend />}>
+            Submit
+          </Button>
+        </Flex>
       </Flex>
     </form>
   );

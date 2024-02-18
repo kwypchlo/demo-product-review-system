@@ -3,11 +3,7 @@ import { eq } from "drizzle-orm";
 import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { accounts, products, reviews, sessions, users } from "./schema";
-import {
-  generateProduct,
-  generateProductReviews,
-  generateUser,
-} from "@/utils/generators";
+import { generateProduct, generateProductReviews, generateUser } from "@/utils/generators";
 
 NextEnv.loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 
@@ -31,10 +27,7 @@ void (async () => {
   const usersResp = await db.insert(users).values(usersData).returning();
 
   const productsData = new Array(300).fill(null).map(() => generateProduct());
-  const productsResp = await db
-    .insert(products)
-    .values(productsData)
-    .returning();
+  const productsResp = await db.insert(products).values(productsData).returning();
 
   for (const product of productsResp) {
     const reviewsData = generateProductReviews(
@@ -43,17 +36,12 @@ void (async () => {
     );
 
     if (reviewsData.length) {
-      const reviewsResp = await db
-        .insert(reviews)
-        .values(reviewsData)
-        .returning();
+      const reviewsResp = await db.insert(reviews).values(reviewsData).returning();
       await db
         .update(products)
         .set({
           reviewCount: reviewsResp.length,
-          rating:
-            reviewsResp.reduce((acc, review) => acc + review.rating, 0) /
-            reviewsResp.length,
+          rating: reviewsResp.reduce((acc, review) => acc + review.rating, 0) / reviewsResp.length,
         })
         .where(eq(products.id, product.id));
     }
