@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  doublePrecision,
   index,
   integer,
   pgTableCreator,
@@ -7,6 +8,8 @@ import {
   serial,
   text,
   timestamp,
+  unique,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -17,7 +20,9 @@ import { type AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = pgTableCreator((name) => `product-review-system_${name}`);
+export const createTable = pgTableCreator(
+  (name) => `product-review-system_${name}`,
+);
 
 export const posts = createTable(
   "post",
@@ -35,7 +40,7 @@ export const posts = createTable(
   (example) => ({
     createdByIdIdx: index("createdById_idx").on(example.createdById),
     nameIndex: index("name_idx").on(example.name),
-  })
+  }),
 );
 
 export const users = createTable("user", {
@@ -76,7 +81,7 @@ export const accounts = createTable(
       columns: [account.provider, account.providerAccountId],
     }),
     userIdIdx: index("account_userId_idx").on(account.userId),
-  })
+  }),
 );
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -96,7 +101,7 @@ export const sessions = createTable(
   },
   (session) => ({
     userIdIdx: index("session_userId_idx").on(session.userId),
-  })
+  }),
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -112,5 +117,51 @@ export const verificationTokens = createTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  })
+  }),
 );
+
+// ----------------
+
+export const products = createTable("products", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  rating: doublePrecision("rating").default(0).notNull(),
+  reviewCount: integer("review_count").default(0).notNull(),
+  image: varchar("image", { length: 255 }).notNull(),
+});
+
+export const productsRelations = relations(products, ({ many }) => ({
+  reviews: many(reviews),
+}));
+
+export const reviews = createTable(
+  "reviews",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    rating: doublePrecision("rating").notNull(),
+    content: text("content").notNull(),
+    date: timestamp("date", { mode: "date" }).defaultNow().notNull(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id),
+    authorId: varchar("author_id", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+  },
+  (reviews) => ({
+    // unique index to ensure that a user can only review a product only once
+    productAuthorUniqueIdx: unique("product_author_unique_idx").on(
+      reviews.productId,
+      reviews.authorId,
+    ),
+  }),
+);
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  post: one(products, {
+    fields: [reviews.productId],
+    references: [products.id],
+  }),
+  author: one(users, { fields: [reviews.authorId], references: [users.id] }),
+}));

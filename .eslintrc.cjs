@@ -4,12 +4,21 @@ const config = {
   parserOptions: {
     project: true,
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "import"],
   extends: [
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "prettier",
   ],
+  settings: {
+    "import/resolver": {
+      typescript: true,
+      node: true,
+    },
+  },
   rules: {
     // These opinionated rules are enabled in stylistic-type-checked above.
     // Feel free to reconfigure them to your own preference.
@@ -31,6 +40,12 @@ const config = {
         checksVoidReturn: { attributes: false },
       },
     ],
+    "sort-imports": ["error", { ignoreDeclarationSort: true }],
+    "import/order": [
+      "error",
+      { alphabetize: { order: "asc" }, "newlines-between": "never" },
+    ],
+    "import/newline-after-import": "error",
   },
 };
 
