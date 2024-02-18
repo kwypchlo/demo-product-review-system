@@ -1,9 +1,23 @@
-import { Divider, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import {
+  Alert,
+  AlertIcon,
+  Button,
+  Center,
+  Divider,
+  Flex,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+} from "@chakra-ui/react";
 import { StarIcon } from "@heroicons/react/20/solid";
 import classNames from "classnames";
 import { useRouter } from "next/router";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { Fragment } from "react";
+import ProductReviews from "@/components/ProductReviews";
 import Review from "@/components/Review";
 import ReviewForm from "@/components/ReviewForm";
 import { api } from "@/utils/api";
@@ -162,9 +176,10 @@ export default function Example() {
       </div>
 
       <div className="mx-auto mt-16 w-full max-w-2xl lg:col-span-4 lg:mt-0 lg:max-w-none">
-        <Tabs>
+        <Tabs isLazy>
           <TabList>
             <Tab>Latest Reviews</Tab>
+            <Tab>All Reviews</Tab>
             <Tab>{!myReviews?.length && "Submit"} Your Review</Tab>
           </TabList>
 
@@ -177,13 +192,49 @@ export default function Example() {
                   {reviewIdx < product.reviews.length - 1 && <Divider />}
                 </Fragment>
               ))}
+
+              {product.reviewCount > product.reviews.length && (
+                <Center gap={2}>
+                  <Divider />
+                  <Button type="button" flexShrink={0}>
+                    See all {product.reviewCount} reviews
+                  </Button>
+                  <Divider />
+                </Center>
+              )}
+
+              {product.reviewCount === product.reviews.length && (
+                <Center gap={2}>
+                  <Divider />
+                  <Text flexShrink={0} fontSize="sm">
+                    no more reviews
+                  </Text>
+                  <Divider />
+                </Center>
+              )}
+            </TabPanel>
+            <TabPanel>
+              <h3 className="sr-only">All Reviews</h3>
+              <ProductReviews product={product} />
             </TabPanel>
             <TabPanel>
               <h3 className="sr-only">Submit Your Review</h3>
 
-              {myReviews && myReviews.length > 0 ? (
+              {session.status === "unauthenticated" && (
+                <Alert status="info">
+                  <AlertIcon />
+                  <Text>You have to be signed in to submit a review</Text>
+                  <Button type="button" onClick={() => signIn()} ml="auto">
+                    Sign in
+                  </Button>
+                </Alert>
+              )}
+
+              {session.status === "authenticated" && myReviews && myReviews.length > 0 && (
                 <Review review={myReviews[0]!} />
-              ) : (
+              )}
+
+              {session.status === "authenticated" && !(myReviews && myReviews.length > 0) && (
                 <ReviewForm productId={product.id} />
               )}
             </TabPanel>

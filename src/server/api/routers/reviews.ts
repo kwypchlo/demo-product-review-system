@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { products, reviews } from "@/server/db/schema";
@@ -17,6 +17,17 @@ export const reviewsRouter = createTRPCRouter({
         },
       });
     }),
+
+  getProductReviews: publicProcedure.input(z.object({ productId: z.string().uuid() })).query(async ({ ctx, input }) => {
+    return ctx.db.query.reviews.findMany({
+      where: (reviews, { eq }) => {
+        return eq(reviews.productId, input.productId);
+      },
+      with: {
+        author: true,
+      },
+    });
+  }),
 
   createReview: protectedProcedure
     .input(
