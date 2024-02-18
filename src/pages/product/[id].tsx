@@ -1,8 +1,7 @@
-import { Tab } from "@headlessui/react";
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import { StarIcon } from "@heroicons/react/20/solid";
 import classNames from "classnames";
 import { useRouter } from "next/router";
-import { Fragment } from "react";
 import Review from "@/components/Review";
 import ReviewForm from "@/components/ReviewForm";
 import { api } from "@/utils/api";
@@ -167,51 +166,26 @@ export default function Example() {
       </div>
 
       <div className="mx-auto mt-16 w-full max-w-2xl lg:col-span-4 lg:mt-0 lg:max-w-none">
-        <Tab.Group as="div">
-          <div className="border-b border-gray-200">
-            <Tab.List className="-mb-px flex space-x-8">
-              <Tab
-                className={({ selected }) =>
-                  classNames(
-                    selected
-                      ? "border-indigo-600 text-indigo-600"
-                      : "border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800",
-                    "whitespace-nowrap border-b-2 py-6 text-sm font-medium",
-                  )
-                }
-              >
-                Latest Reviews
-              </Tab>
-              <Tab
-                className={({ selected }) =>
-                  classNames(
-                    selected
-                      ? "border-indigo-600 text-indigo-600"
-                      : "border-transparent text-gray-700 hover:border-gray-300 hover:text-gray-800",
-                    "whitespace-nowrap border-b-2 py-6 text-sm font-medium",
-                  )
-                }
-              >
-                Submit Your Review
-              </Tab>
-            </Tab.List>
-          </div>
-          <Tab.Panels as={Fragment}>
-            <Tab.Panel className="-mb-10">
-              <h3 className="sr-only">Latest Reviews</h3>
+        <Tabs>
+          <TabList>
+            <Tab>Latest Reviews</Tab>
+            <Tab>Submit Your Review</Tab>
+          </TabList>
 
+          <TabPanels>
+            <TabPanel>
+              <h3 className="sr-only">Latest Reviews</h3>
               {product.reviews.map((review) => (
                 <Review key={review.id} review={review} />
               ))}
-            </Tab.Panel>
-
-            <Tab.Panel className="text-sm text-gray-500">
+            </TabPanel>
+            <TabPanel>
               <h3 className="sr-only">Submit Your Review</h3>
 
               <ReviewForm productId={product.id} />
-            </Tab.Panel>
-          </Tab.Panels>
-        </Tab.Group>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </div>
     </div>
   );

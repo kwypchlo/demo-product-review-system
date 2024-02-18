@@ -7,9 +7,6 @@ import { theme } from "@/styles/theme";
 import { api } from "@/utils/api";
 import "@/styles/globals.css";
 import "@smastrom/react-rating/style.css";
-import "@fontsource/sora/400.css";
-import "@fontsource/sora/500.css";
-import "@fontsource/sora/700.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({ Component, pageProps: { session, ...pageProps } }) => {
   return (

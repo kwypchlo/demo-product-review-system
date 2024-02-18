@@ -1,8 +1,8 @@
-import { Button, Flex, Textarea } from "@chakra-ui/react";
+import { Button, Flex, Stack, Text, Textarea, useToast } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Rating } from "@smastrom/react-rating";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
-import { AiOutlineSend } from "react-icons/ai";
+import { FiSend } from "react-icons/fi";
 import { z } from "zod";
 import { api } from "@/utils/api";
 
@@ -12,27 +12,42 @@ type Inputs = {
 };
 
 const schema = z.object({
-  content: z.string().min(1),
-  rating: z.number().int().min(1).max(5),
+  content: z.string().min(1, "Review content cannot be empty."),
+  rating: z.number().int().min(1, "Please select review rating.").max(5),
 });
 
 export default function ReviewForm({ productId }: { productId: string }) {
+  const toast = useToast();
   const utils = api.useUtils();
-  const { mutate, isLoading } = api.products.createReview.useMutation({
-    onSuccess: () => {
-      void utils.products.getProductById.invalidate({ id: productId });
-      void utils.products.getProductReviews.invalidate({ productId });
-    },
-  });
+
   const {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
     defaultValues: {
       rating: 0,
+    },
+  });
+
+  const { mutate, isLoading } = api.products.createReview.useMutation({
+    onSuccess: () => {
+      void utils.products.getProductById.invalidate({ id: productId });
+      void utils.products.getProductReviews.invalidate({ productId });
+
+      toast({ title: "Your review has been submitted.", status: "success" });
+
+      reset(); // reset form after successful submission
+    },
+    onError: (error) => {
+      toast({
+        title: "There was an error submitting your review.",
+        description: error.message,
+        status: "error",
+      });
     },
   });
 
@@ -69,11 +84,15 @@ export default function ReviewForm({ productId }: { productId: string }) {
 
         <Textarea placeholder="Write your review here" {...register("content")} />
 
-        {/* errors will return when field validation fails  */}
-        {errors.content && <span>This field is required</span>}
-
-        <Flex justifyContent={"flex-end"}>
-          <Button type="submit" isLoading={isLoading} colorScheme="green" leftIcon={<AiOutlineSend />}>
+        <Flex justifyContent="space-between" alignItems="center">
+          <Stack spacing={2}>
+            {Object.entries(errors).map(([field, error]) => (
+              <Text key={field} color="red.500">
+                {error.message}
+              </Text>
+            ))}
+          </Stack>
+          <Button type="submit" isLoading={isLoading} colorScheme="green" leftIcon={<FiSend />}>
             Submit
           </Button>
         </Flex>
