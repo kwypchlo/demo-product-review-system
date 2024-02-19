@@ -1,4 +1,4 @@
-import { AspectRatio, Box, HStack, Link, Stack, Text } from "@chakra-ui/react";
+import { AspectRatio, Box, HStack, Link, Skeleton, Stack, Text } from "@chakra-ui/react";
 import { Rating } from "@smastrom/react-rating";
 import Image from "next/image";
 import { type RouterOutputs } from "@/utils/api";
@@ -12,7 +12,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Stack spacing={{ base: "4", md: "5" }}>
       <Box as={Link} href={`/product/${product.id}`} position="relative">
         <AspectRatio ratio={4 / 3} borderRadius={{ base: "md", md: "xl" }} overflow="hidden">
-          <Image src={product.image} alt={product.name} width={240} height={180} draggable="false" />
+          <>
+            <Skeleton width={240} height={180} />
+            <Image src={product.image} alt={product.name} width={240} height={180} draggable="false" />
+          </>
         </AspectRatio>
       </Box>
       <Stack>

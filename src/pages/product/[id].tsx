@@ -14,6 +14,7 @@ import {
   Hide,
   Link,
   Show,
+  Skeleton,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -39,7 +40,10 @@ export default function Product() {
     <Flex direction={["column", null, "row"]} gap={8}>
       <Flex flex={2} direction="column">
         <AspectRatio ratio={4 / 3} borderRadius={{ base: "md", md: "xl" }} overflow="hidden">
-          <Image src={product.image} alt={product.name} width={480} height={360} draggable="false" />
+          <>
+            <Skeleton width={480} height={360} />
+            <Image src={product.image} alt={product.name} width={480} height={360} draggable="false" />
+          </>
         </AspectRatio>
 
         <Show above="md">
