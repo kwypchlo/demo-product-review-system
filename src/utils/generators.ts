@@ -27,7 +27,7 @@ export const generateReview = (productId: string, authorId: string) => {
 
 export const generateProductReviews = (productId: string, authorIds: string[]) => {
   authorIds = authorIds.slice(); // copy the array
-  return new Array(faker.number.int({ min: 0, max: 50 })).fill(null).map(() => {
+  return new Array(faker.number.int({ min: 1, max: 50 })).fill(null).map(() => {
     faker.helpers.shuffle(authorIds, { inplace: true }); // shuffle the array in place
 
     return generateReview(productId, authorIds.pop()!);
