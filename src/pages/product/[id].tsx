@@ -33,12 +33,6 @@ export default function Product() {
     { enabled: router.isReady },
   );
 
-  const goBack = () => {
-    console.log(window.history);
-    console.log(router);
-    // router.back()
-  };
-
   if (isLoading) return <div>Loading...</div>;
   if (!product) return <div>No product found</div>;
 
