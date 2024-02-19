@@ -1,5 +1,6 @@
 import { Box, Button, Center, Divider, Spinner, Text } from "@chakra-ui/react";
 import { Fragment } from "react";
+import DividerWithContent from "./DividerWithContent";
 import Review from "./Review";
 import { type RouterOutputs, api } from "@/utils/api";
 
@@ -30,23 +31,19 @@ export default function ProductReviews({ product }: ProductReviewsProps) {
       ))}
 
       {product.reviewCount > product.reviews.length && (
-        <Center gap={2}>
-          <Divider />
-          <Button type="button" flexShrink={0}>
+        <DividerWithContent>
+          <Button type="button" variant="outline">
             Load more reviews
           </Button>
-          <Divider />
-        </Center>
+        </DividerWithContent>
       )}
 
       {product.reviewCount === product.reviews.length && (
-        <Center gap={2}>
-          <Divider />
-          <Text flexShrink={0} fontSize="sm">
+        <DividerWithContent>
+          <Text fontSize="sm" fontWeight="thin">
             no more reviews
           </Text>
-          <Divider />
-        </Center>
+        </DividerWithContent>
       )}
     </Box>
   );

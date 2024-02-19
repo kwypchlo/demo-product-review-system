@@ -8,7 +8,7 @@ type ProductCardProps = {
 
 export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <Stack spacing={{ base: "4", md: "5" }} _hover={{ boxShadow: "inner" }}>
+    <Stack spacing={{ base: "4", md: "5" }}>
       <Box as={Link} href={`/product/${product.id}`} position="relative">
         <AspectRatio ratio={4 / 3}>
           <Image
