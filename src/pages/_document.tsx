@@ -5,11 +5,7 @@ import { theme } from "@/styles/theme";
 export default function Document() {
   return (
     <Html lang="en">
-      <Head>
-        <title>Ecommerce Review App</title>
-        <meta name="description" content="Browse and review your favorite products" />
-        <link rel="icon" href="/favicon.svg" />
-      </Head>
+      <Head />
       <body>
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <Main />

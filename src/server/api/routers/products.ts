@@ -1,8 +1,7 @@
-import { TRPCError } from "@trpc/server";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
-import { products, reviews } from "@/server/db/schema";
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { reviews } from "@/server/db/schema";
 
 export const productsRouter = createTRPCRouter({
   getProducts: publicProcedure
