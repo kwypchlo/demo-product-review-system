@@ -12,7 +12,7 @@ export const generateProduct = () => {
     tags: [faker.commerce.productAdjective()],
     rating: faker.number.float({ min: 1, max: 5, fractionDigits: 2 }),
     reviewCount: faker.number.int({ min: 0, max: 100 }),
-    image: faker.image.urlLoremFlickr({ category: "art" }),
+    image: faker.image.urlPicsumPhotos({ width: 480, height: 360 }),
   };
 };
 
@@ -39,6 +39,6 @@ export const generateUser = () => {
     id: faker.string.nanoid(),
     name: faker.person.fullName(),
     email: faker.internet.email(),
-    image: faker.image.avatar(),
+    image: faker.image.avatarGitHub(),
   };
 };

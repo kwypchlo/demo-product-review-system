@@ -12,14 +12,13 @@ import {
   HStack,
   Heading,
   Hide,
-  Image,
   Link,
   Show,
-  Skeleton,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { Rating } from "@smastrom/react-rating";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { FiChevronsLeft } from "react-icons/fi";
 import sections from "./sections.json";
@@ -39,14 +38,8 @@ export default function Product() {
   return (
     <Flex direction={["column", null, "row"]} gap={8}>
       <Flex flex={2} direction="column">
-        <AspectRatio ratio={4 / 3}>
-          <Image
-            src={product.image}
-            alt={product.name}
-            draggable="false"
-            fallback={<Skeleton />}
-            borderRadius={{ base: "md", md: "xl" }}
-          />
+        <AspectRatio ratio={4 / 3} borderRadius={{ base: "md", md: "xl" }} overflow="hidden">
+          <Image src={product.image} alt={product.name} width={480} height={360} draggable="false" />
         </AspectRatio>
 
         <Show above="md">

@@ -21,6 +21,13 @@ const config = {
   experimental: {
     scrollRestoration: true,
   },
+
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "avatars.githubusercontent.com", port: "" },
+      { protocol: "https", hostname: "picsum.photos", port: "" },
+    ],
+  },
 };
 
 export default config;
