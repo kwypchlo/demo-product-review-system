@@ -1,29 +1,24 @@
-import {
-  Alert,
-  AlertIcon,
-  Button,
-  Center,
-  Divider,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-} from "@chakra-ui/react";
+import { Alert, AlertIcon, Button, Divider, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import DividerWithContent from "./DividerWithContent";
 import ProductReviews from "./ProductReviews";
 import Review from "./Review";
 import ReviewForm from "./ReviewForm";
 import { type RouterOutputs, api } from "@/utils/api";
 
+const tabIndexes = {
+  latestReviews: 0,
+  allReviews: 1,
+  userReview: 2,
+};
+
 type ProductReviewsWidgetProps = {
   product: NonNullable<RouterOutputs["products"]["getProductById"]>;
 };
 
 export default function ProductReviewsWidget({ product }: ProductReviewsWidgetProps) {
+  const [tabIndex, setTabIndex] = useState(tabIndexes.latestReviews);
   const session = useSession();
   const { data: myReviews } = api.reviews.getMyProductReviews.useQuery(
     { productId: product.id },
@@ -33,7 +28,7 @@ export default function ProductReviewsWidget({ product }: ProductReviewsWidgetPr
   const myReview = myReviews?.[0]; // only one review per product per user
 
   return (
-    <Tabs isLazy>
+    <Tabs index={tabIndex} onChange={(index: number) => setTabIndex(index)} isLazy>
       <TabList>
         <Tab>Latest Reviews</Tab>
         <Tab>All Reviews ({product.reviewCount})</Tab>
@@ -52,7 +47,7 @@ export default function ProductReviewsWidget({ product }: ProductReviewsWidgetPr
 
           {product.reviewCount > product.reviews.length && (
             <DividerWithContent>
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" onClick={() => setTabIndex(tabIndexes.allReviews)}>
                 See all {product.reviewCount} reviews
               </Button>
             </DividerWithContent>
