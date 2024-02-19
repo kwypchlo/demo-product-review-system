@@ -14,7 +14,7 @@ export const productsRouter = createTRPCRouter({
         filterBy: z.enum(["4stars", "3stars"]).optional(),
       }),
     )
-    .query(({ ctx, input }) => {
+    .query(async ({ ctx, input }) => {
       return ctx.db.query.products.findMany({
         orderBy: (products, { asc, desc }) => {
           const dir = input.orderBy.direction === "asc" ? asc : desc;

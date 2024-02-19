@@ -1,4 +1,14 @@
-import { Avatar, Button, Container, Flex, IconButton, Stack, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import {
+  Avatar,
+  Button,
+  Container,
+  Flex,
+  Hide,
+  IconButton,
+  Stack,
+  useColorMode,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import Image from "next/image";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -26,7 +36,7 @@ export default function Navigation() {
           {session.status === "authenticated" && (
             <>
               <Button type="button" onClick={() => signOut()} variant="outline">
-                Sign out {session.data.user.email}
+                Sign out <Hide below="md">{session.data.user.email}</Hide>
               </Button>
 
               <Avatar src={session.data.user.image!} name={session.data.user.name ?? session.data.user.email ?? "-"} />

@@ -33,7 +33,7 @@ export const reviewsRouter = createTRPCRouter({
     .input(
       z.object({
         productId: z.string().uuid(),
-        content: z.string().min(1),
+        content: z.string().min(1).max(360),
         rating: z.number().int().min(1).max(5),
       }),
     )

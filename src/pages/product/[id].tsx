@@ -1,6 +1,28 @@
-import { AspectRatio, Divider, Grid, GridItem, HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react";
+import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  AspectRatio,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  HStack,
+  Heading,
+  Hide,
+  Image,
+  Link,
+  Show,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { Rating } from "@smastrom/react-rating";
 import { useRouter } from "next/router";
+import { FiChevronsLeft } from "react-icons/fi";
+import sections from "./sections.json";
 import ProductReviewsWidget from "@/components/ProductReviewsWidget";
 import { api } from "@/utils/api";
 
@@ -11,12 +33,18 @@ export default function Product() {
     { enabled: router.isReady },
   );
 
+  const goBack = () => {
+    console.log(window.history);
+    console.log(router);
+    // router.back()
+  };
+
   if (isLoading) return <div>Loading...</div>;
   if (!product) return <div>No product found</div>;
 
   return (
-    <Grid templateColumns="repeat(5, 1fr)" gap={8}>
-      <GridItem rowSpan={2} colSpan={2}>
+    <Flex direction={["column", null, "row"]} gap={8}>
+      <Flex flex={2} direction="column">
         <AspectRatio ratio={4 / 3}>
           <Image
             src={product.image}
@@ -27,19 +55,26 @@ export default function Product() {
           />
         </AspectRatio>
 
-        <Divider my={8} />
+        <Show above="md">
+          {sections.map((section) => (
+            <Flex key={section.title} my={4} gap={4} direction="column">
+              <Divider />
+              <Heading as="h3" size="sm">
+                {section.title}
+              </Heading>
+              <Text>{section.content}</Text>
+            </Flex>
+          ))}
+        </Show>
+      </Flex>
 
-        <Heading mt={4} as="h3" size="sm">
-          License
-        </Heading>
+      <Flex flex={3} direction="column">
+        <Box>
+          <Button as={Link} href="/" leftIcon={<FiChevronsLeft />} variant="link">
+            Back to products
+          </Button>
+        </Box>
 
-        <Text mt={4}>
-          For personal and professional use. You cannot resell or redistribute these images in their original or
-          modified state.
-        </Text>
-      </GridItem>
-
-      <GridItem colSpan={3}>
         <VStack spacing={6} mb={10} alignItems="flex-start">
           <Heading>{product.name}</Heading>
 
@@ -51,10 +86,28 @@ export default function Product() {
           </HStack>
 
           <Text fontWeight="semibold">{product.description}</Text>
+
+          <Hide above="md">
+            <Accordion allowToggle w="full">
+              {sections.map((section) => (
+                <AccordionItem key={section.title}>
+                  <Heading as="h3" fontWeight="normal" size="sm">
+                    <AccordionButton>
+                      <Box as="span" flex="1" textAlign="left">
+                        {section.title}
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </Heading>
+                  <AccordionPanel pb={4}>{section.content}</AccordionPanel>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </Hide>
         </VStack>
 
         <ProductReviewsWidget product={product} />
-      </GridItem>
-    </Grid>
+      </Flex>
+    </Flex>
   );
 }

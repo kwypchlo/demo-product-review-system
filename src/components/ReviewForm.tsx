@@ -1,6 +1,24 @@
-import { Button, Flex, Stack, Text, Textarea, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  FormLabel,
+  Hide,
+  Input,
+  Kbd,
+  Stack,
+  Text,
+  Textarea,
+  VStack,
+  VisuallyHidden,
+  useToast,
+} from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Rating } from "@smastrom/react-rating";
+import { useEffect, useState } from "react";
 import { Controller, type SubmitHandler, useForm } from "react-hook-form";
 import { FiSend } from "react-icons/fi";
 import { z } from "zod";
@@ -12,13 +30,17 @@ type Inputs = {
 };
 
 const schema = z.object({
-  content: z.string().min(1, "Review content cannot be empty."),
+  content: z.string().min(1, "Review content cannot be empty.").max(360, "Review content is too long."),
   rating: z.number().int().min(1, "Please select review rating.").max(5),
 });
 
 export default function ReviewForm({ productId }: { productId: string }) {
   const toast = useToast();
   const utils = api.useUtils();
+
+  // use useState to get a reference to the form element instead of using
+  // useRef to be able to use the form element in the useEffect hook
+  const [formNode, setFormNode] = useState<HTMLFormElement | null>(null);
 
   const {
     register,
@@ -56,12 +78,23 @@ export default function ReviewForm({ productId }: { productId: string }) {
     mutate({ productId, ...data });
   };
 
-  console.log(errors);
+  useEffect(() => {
+    const eventListener = (event: KeyboardEvent) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        formNode?.requestSubmit();
+      }
+    };
 
-  // console.log(watch("example")); // watch input value by passing the name of it
+    formNode?.addEventListener("keydown", eventListener);
+
+    return () => {
+      formNode?.removeEventListener("keydown", eventListener);
+    };
+  }, [formNode]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)} ref={setFormNode}>
       <Flex direction="column" gap={4} py={4}>
         <Flex alignItems="center" gap={4}>
           <Controller
@@ -80,22 +113,32 @@ export default function ReviewForm({ productId }: { productId: string }) {
               />
             )}
           />
-          Select your rating
+          <Text color={errors.rating ? "red" : undefined}>Select your rating</Text>
         </Flex>
 
-        <Textarea placeholder="Write your review here" {...register("content")} />
+        <FormControl isInvalid={!!errors.content}>
+          <VisuallyHidden>
+            <FormLabel>Email</FormLabel>
+          </VisuallyHidden>
+          <Textarea placeholder="Write your review here" {...register("content")} />
+          {errors.content ? (
+            <FormErrorMessage>{errors.content.message}</FormErrorMessage>
+          ) : (
+            <FormHelperText>Please ensure your review adheres to our Code of Conduct</FormHelperText>
+          )}
+        </FormControl>
 
-        <Flex justifyContent="space-between" alignItems="center">
-          <Stack spacing={2}>
-            {Object.entries(errors).map(([field, error]) => (
-              <Text key={field} color="red.500">
-                {error.message}
-              </Text>
-            ))}
-          </Stack>
-          <Button type="submit" isLoading={isLoading} colorScheme="green" leftIcon={<FiSend />}>
-            Submit
-          </Button>
+        <Flex justifyContent="flex-end" alignItems="center">
+          <VStack spacing={2} alignItems="flex-end">
+            <Button type="submit" isLoading={isLoading} colorScheme="green" leftIcon={<FiSend />}>
+              Submit
+            </Button>
+            <Hide below="md">
+              <Box>
+                <Kbd>⌘</Kbd> + <Kbd>Enter</Kbd>
+              </Box>
+            </Hide>
+          </VStack>
         </Flex>
       </Flex>
     </form>

@@ -1,4 +1,16 @@
-import { Alert, AlertIcon, Button, Divider, Tab, TabList, TabPanel, TabPanels, Tabs, Text } from "@chakra-ui/react";
+import {
+  Alert,
+  AlertIcon,
+  Button,
+  Divider,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+  VisuallyHidden,
+} from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";
 import { Fragment, useState } from "react";
 import DividerWithContent from "./DividerWithContent";
@@ -28,7 +40,7 @@ export default function ProductReviewsWidget({ product }: ProductReviewsWidgetPr
   const myReview = myReviews?.[0]; // only one review per product per user
 
   return (
-    <Tabs index={tabIndex} onChange={(index: number) => setTabIndex(index)} isLazy>
+    <Tabs index={tabIndex} onChange={(index: number) => setTabIndex(index)} isLazy size={["sm", "md"]}>
       <TabList>
         <Tab>Latest Reviews</Tab>
         <Tab>All Reviews ({product.reviewCount})</Tab>
@@ -37,7 +49,9 @@ export default function ProductReviewsWidget({ product }: ProductReviewsWidgetPr
 
       <TabPanels>
         <TabPanel>
-          <h3 className="sr-only">Latest Reviews</h3>
+          <VisuallyHidden>
+            <h3>Latest Reviews</h3>
+          </VisuallyHidden>
           {product.reviews.map((review, reviewIdx) => (
             <Fragment key={review.id}>
               <Review review={review} />
@@ -60,11 +74,15 @@ export default function ProductReviewsWidget({ product }: ProductReviewsWidgetPr
           )}
         </TabPanel>
         <TabPanel>
-          <h3 className="sr-only">All Reviews</h3>
+          <VisuallyHidden>
+            <h3>All Reviews</h3>
+          </VisuallyHidden>
           <ProductReviews product={product} />
         </TabPanel>
         <TabPanel>
-          <h3 className="sr-only">Submit Your Review</h3>
+          <VisuallyHidden>
+            <h3>Submit Your Review</h3>
+          </VisuallyHidden>
 
           {session.status === "unauthenticated" && (
             <Alert status="info">

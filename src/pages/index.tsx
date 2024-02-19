@@ -1,4 +1,4 @@
-import { Center, Flex, Select, Spinner } from "@chakra-ui/react";
+import { Center, Flex, Progress, Select } from "@chakra-ui/react";
 import { useState } from "react";
 import ProductCardPro from "@/components/ProductCard";
 import { ProductGrid } from "@/components/ProductGrid";
@@ -47,7 +47,9 @@ export default function Index() {
   return (
     <Flex flexDirection="column" gap={4}>
       <Flex flexDirection="row" justifyContent="flex-end" gap={4} alignItems="center">
-        {products && isRefetching && <Spinner />}
+        {products && isRefetching && (
+          <Progress size="xs" isIndeterminate position="absolute" left={0} right={0} top={0} />
+        )}
 
         <Select
           placeholder={filterBy ? "Do not filter" : "Filter by"}
@@ -71,11 +73,7 @@ export default function Index() {
         </Select>
       </Flex>
 
-      {isLoading && !products && (
-        <Center>
-          <Spinner />
-        </Center>
-      )}
+      {isLoading && !products && <Progress size="xs" isIndeterminate position="absolute" left={0} right={0} top={0} />}
 
       {!products && !isLoading && <Center>No products found</Center>}
 

@@ -1,4 +1,4 @@
-import { Avatar, Button, Flex, Heading, Text, useToast } from "@chakra-ui/react";
+import { Avatar, Button, Flex, Heading, Text, VisuallyHidden, useColorModeValue, useToast } from "@chakra-ui/react";
 import { Rating } from "@smastrom/react-rating";
 import { useSession } from "next-auth/react";
 import { FiTrash } from "react-icons/fi";
@@ -34,7 +34,7 @@ export default function Review({ review }: ReviewProps) {
 
   return (
     <Flex gap={4} py={4}>
-      <Avatar src={review.author.image!} name={review.author.name!} />
+      <Avatar src={review.author.image!} name={review.author.name!} bg={useColorModeValue("gray.100", "gray.900")} />
 
       <Flex direction="column" gap={2} flex={1}>
         <Flex justifyContent="space-between" alignItems="top" gap={4}>
@@ -54,7 +54,10 @@ export default function Review({ review }: ReviewProps) {
         </Text>
 
         <Rating value={Math.round(review.rating)} style={{ maxWidth: 100 }} readOnly />
-        <p className="sr-only">{Math.round(review.rating)} out of 5 stars</p>
+
+        <VisuallyHidden>
+          <p>{Math.round(review.rating)} out of 5 stars</p>
+        </VisuallyHidden>
 
         <Text>{review.content}</Text>
       </Flex>
