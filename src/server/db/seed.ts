@@ -53,11 +53,12 @@ void (async () => {
 
   for (const product of productsResp) {
     const reviews = reviewsData.filter((review) => review.productId === product.id);
+
     await db
       .update(products)
       .set({
         reviewCount: reviews.length,
-        rating: reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length,
+        rating: reviews.length ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0,
       })
       .where(eq(products.id, product.id));
   }
