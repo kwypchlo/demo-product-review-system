@@ -11,38 +11,47 @@ const orderByOptions = [
   { value: "reviewCount:asc", label: "Reviews Asc" },
   { value: "rating:desc", label: "Rating Desc" },
   { value: "rating:asc", label: "Rating Asc" },
-];
+] as const;
 
 const filterByOptions = [
-  { value: "4stars", label: "At least 4 stars" },
-  { value: "3stars", label: "At least 3 stars" },
-];
+  { value: "rating:>=:4", label: "Rated 4 or more" },
+  { value: "rating:>=:3", label: "Rated 3 or more" },
+  { value: "rating:<=:3", label: "Rated 3 or less" },
+  { value: "rating:<=:2", label: "Rated 2 or less" },
+] as const;
 
 type FilterByInput = RouterInputs["products"]["getProducts"]["filterBy"];
 type OrderByInput = RouterInputs["products"]["getProducts"]["orderBy"];
 
+type FilterByOption = (typeof filterByOptions)[number]["value"] | "";
+type OrderByOption = (typeof orderByOptions)[number]["value"];
+
+function parseFilterBy(orderBy: FilterByOption): FilterByInput {
+  if (!orderBy) return;
+
+  const [field, comparison, value] = orderBy.split(":");
+
+  return { field, comparison, value: parseInt(value!, 10) } as FilterByInput;
+}
+
+function parseOrderBy(orderBy: OrderByOption): OrderByInput {
+  const [field, direction] = orderBy.split(":");
+
+  return { field, direction } as OrderByInput;
+}
+
 export default function Index() {
-  const [filterBy, setFilterBy] = useState<FilterByInput>();
-  const [orderBy, setOrderBy] = useState<OrderByInput>({
-    field: "name",
-    direction: "asc",
-  });
-
-  const onChangeFilterBy = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilterBy((e.target.value || undefined) as FilterByInput);
-  };
-
-  const onChangeOrderBy = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const [field, direction] = e.target.value.split(":");
-
-    setOrderBy({ field, direction } as OrderByInput);
-  };
+  const [filterBy, setFilterBy] = useState<FilterByOption>("");
+  const [orderBy, setOrderBy] = useState<OrderByOption>("name:asc");
 
   const {
     data: products,
     isLoading,
     isRefetching,
-  } = api.products.getProducts.useQuery({ orderBy, filterBy }, { keepPreviousData: true });
+  } = api.products.getProducts.useQuery(
+    { orderBy: parseOrderBy(orderBy), filterBy: parseFilterBy(filterBy) },
+    { keepPreviousData: true },
+  );
 
   return (
     <Flex flexDirection="column" gap={4}>
@@ -54,7 +63,7 @@ export default function Index() {
         <Select
           placeholder={filterBy ? "Do not filter" : "Filter by"}
           maxW={200}
-          onChange={onChangeFilterBy}
+          onChange={(event) => setFilterBy(event.target.value as FilterByOption)}
           value={filterBy}
         >
           {filterByOptions.map((option) => (
@@ -64,7 +73,7 @@ export default function Index() {
           ))}
         </Select>
 
-        <Select maxW={250} onChange={onChangeOrderBy} value={`${orderBy.field}:${orderBy.direction}`}>
+        <Select maxW={250} onChange={(event) => setOrderBy(event.target.value as OrderByOption)} value={orderBy}>
           {orderByOptions.map((option) => (
             <option key={option.value} value={option.value}>
               Order By {option.label}

@@ -11,7 +11,13 @@ export const productsRouter = createTRPCRouter({
           field: z.enum(["name", "rating", "reviewCount"]),
           direction: z.enum(["asc", "desc"]),
         }),
-        filterBy: z.enum(["4stars", "3stars"]).optional(),
+        filterBy: z
+          .object({
+            field: z.enum(["rating"]),
+            comparison: z.enum([">=", "<=", "=="]),
+            value: z.number().int().min(1).max(5),
+          })
+          .optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -21,13 +27,12 @@ export const productsRouter = createTRPCRouter({
 
           return [dir(products[input.orderBy.field])];
         },
-        where: (products, { gte }) => {
-          if (input.filterBy === "4stars") {
-            return gte(products.rating, 4);
-          }
+        where: (products, { gte, lte, eq }) => {
+          if (input.filterBy) {
+            const { field, comparison, value } = input.filterBy;
+            const cmp = { ">=": gte, "<=": lte, "==": eq }[comparison];
 
-          if (input.filterBy === "3stars") {
-            return gte(products.rating, 3);
+            return cmp(products[field], value);
           }
         },
       });

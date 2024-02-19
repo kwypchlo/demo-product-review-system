@@ -6,6 +6,7 @@ import {
   pgTableCreator,
   primaryKey,
   serial,
+  smallint,
   text,
   timestamp,
   unique,
@@ -133,7 +134,7 @@ export const reviews = createTable(
   "reviews",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    rating: doublePrecision("rating").notNull(),
+    rating: smallint("rating").notNull(),
     content: text("content").notNull(),
     date: timestamp("date", { mode: "date" }).defaultNow().notNull(),
     productId: uuid("product_id")

@@ -1,15 +1,65 @@
-import { Box, Button, Center, Divider, Spinner, Text } from "@chakra-ui/react";
-import { Fragment } from "react";
+import { Box, Button, Center, Divider, Flex, Progress, Select, Spinner, Text, filter } from "@chakra-ui/react";
+import { Fragment, useState } from "react";
 import DividerWithContent from "./DividerWithContent";
 import Review from "./Review";
-import { type RouterOutputs, api } from "@/utils/api";
+import { products } from "@/server/db/schema";
+import { type RouterInputs, type RouterOutputs, api } from "@/utils/api";
+
+const orderByOptions = [
+  { value: "date:desc", label: "Date Desc" },
+  { value: "date:asc", label: "Date Asc" },
+  { value: "rating:desc", label: "Rating Desc" },
+  { value: "rating:asc", label: "Rating Asc" },
+] as const;
+
+const filterByOptions = [
+  { value: "rating:>=:4", label: "Rated 4 or more" },
+  { value: "rating:>=:3", label: "Rated 3 or more" },
+  { value: "rating:<=:3", label: "Rated 3 or less" },
+  { value: "rating:<=:2", label: "Rated 2 or less" },
+  { value: "rating:==:1", label: "Rated ⭐" },
+  { value: "rating:==:2", label: "Rated ⭐⭐" },
+  { value: "rating:==:3", label: "Rated ⭐⭐⭐" },
+  { value: "rating:==:4", label: "Rated ⭐⭐⭐⭐" },
+  { value: "rating:==:5", label: "Rated ⭐⭐⭐⭐⭐" },
+] as const;
 
 type ProductReviewsProps = {
   product: NonNullable<RouterOutputs["products"]["getProductById"]>;
 };
 
+type FilterByInput = RouterInputs["reviews"]["getProductReviews"]["filterBy"];
+type OrderByInput = RouterInputs["reviews"]["getProductReviews"]["orderBy"];
+
+type FilterByOption = (typeof filterByOptions)[number]["value"] | "";
+type OrderByOption = (typeof orderByOptions)[number]["value"];
+
+function parseFilterBy(orderBy: FilterByOption): FilterByInput {
+  if (!orderBy) return;
+
+  const [field, comparison, value] = orderBy.split(":");
+
+  return { field, comparison, value: parseInt(value!, 10) } as FilterByInput;
+}
+
+function parseOrderBy(orderBy: OrderByOption): OrderByInput {
+  const [field, direction] = orderBy.split(":");
+
+  return { field, direction } as OrderByInput;
+}
+
 export default function ProductReviews({ product }: ProductReviewsProps) {
-  const { data: reviews, isLoading } = api.reviews.getProductReviews.useQuery({ productId: product.id });
+  const [filterBy, setFilterBy] = useState<FilterByOption>("");
+  const [orderBy, setOrderBy] = useState<OrderByOption>("date:desc");
+
+  const {
+    data: reviews,
+    isLoading,
+    isRefetching,
+  } = api.reviews.getProductReviews.useQuery(
+    { productId: product.id, orderBy: parseOrderBy(orderBy), filterBy: parseFilterBy(filterBy) },
+    { keepPreviousData: true },
+  );
 
   if (isLoading && !reviews) {
     return (
@@ -22,29 +72,58 @@ export default function ProductReviews({ product }: ProductReviewsProps) {
   if (!reviews) return null;
 
   return (
-    <Box>
-      {reviews.map((review, reviewIdx) => (
-        <Fragment key={review.id}>
-          <Review review={review} />
-          {reviewIdx < reviews.length - 1 && <Divider />}
-        </Fragment>
-      ))}
+    <Flex direction="column">
+      <Flex flexDirection="row" justifyContent="flex-end" gap={4} alignItems="center">
+        {products && isRefetching && (
+          <Progress size="xs" isIndeterminate position="absolute" left={0} right={0} top={0} />
+        )}
 
-      {product.reviewCount > product.reviews.length && (
-        <DividerWithContent>
-          <Button type="button" variant="outline">
-            Load more reviews
-          </Button>
-        </DividerWithContent>
-      )}
+        <Select
+          placeholder={filterBy ? "Do not filter" : "Filter by"}
+          maxW={200}
+          onChange={(event) => setFilterBy(event.target.value as FilterByOption)}
+          value={filterBy}
+        >
+          {filterByOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </Select>
 
-      {product.reviewCount === product.reviews.length && (
-        <DividerWithContent>
-          <Text fontSize="sm" fontWeight="thin">
-            no more reviews
-          </Text>
-        </DividerWithContent>
-      )}
-    </Box>
+        <Select maxW={250} onChange={(event) => setOrderBy(event.target.value as OrderByOption)}>
+          {orderByOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              Order By {option.label}
+            </option>
+          ))}
+        </Select>
+      </Flex>
+
+      <Box>
+        {reviews.map((review, reviewIdx) => (
+          <Fragment key={review.id}>
+            <Review review={review} />
+            {reviewIdx < reviews.length - 1 && <Divider />}
+          </Fragment>
+        ))}
+
+        {product.reviewCount > product.reviews.length && (
+          <DividerWithContent>
+            <Button type="button" variant="outline">
+              Load more reviews
+            </Button>
+          </DividerWithContent>
+        )}
+
+        {product.reviewCount === product.reviews.length && (
+          <DividerWithContent>
+            <Text fontSize="sm" fontWeight="thin">
+              no more reviews
+            </Text>
+          </DividerWithContent>
+        )}
+      </Box>
+    </Flex>
   );
 }

@@ -18,16 +18,52 @@ export const reviewsRouter = createTRPCRouter({
       });
     }),
 
-  getProductReviews: publicProcedure.input(z.object({ productId: z.string().uuid() })).query(async ({ ctx, input }) => {
-    return ctx.db.query.reviews.findMany({
-      where: (reviews, { eq }) => {
-        return eq(reviews.productId, input.productId);
-      },
-      with: {
-        author: true,
-      },
-    });
-  }),
+  getProductReviews: publicProcedure
+    .input(
+      z.object({
+        productId: z.string().uuid(),
+        orderBy: z.object({
+          field: z.enum(["date", "rating"]),
+          direction: z.enum(["asc", "desc"]),
+        }),
+        filterBy: z
+          .object({
+            field: z.enum(["rating"]),
+            comparison: z.enum([">=", "<=", "=="]),
+            value: z.number().int().min(1).max(5),
+          })
+          .optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.query.reviews.findMany({
+        orderBy: (products, { asc, desc }) => {
+          const dir = input.orderBy.direction === "asc" ? asc : desc;
+          const order = [dir(products[input.orderBy.field])];
+
+          // when ordering by rating, we also want to order by date on equal ratings
+          if (input.orderBy.field === "rating") {
+            order.push(desc(products.date));
+          }
+
+          return order;
+        },
+        where: (reviews, { eq, and, gte, lte }) => {
+          const where = eq(reviews.productId, input.productId);
+
+          if (input.filterBy) {
+            const { field, comparison, value } = input.filterBy;
+            const cmp = { ">=": gte, "<=": lte, "==": eq }[comparison];
+            return and(where, cmp(reviews[field], value));
+          }
+
+          return where;
+        },
+        with: {
+          author: true,
+        },
+      });
+    }),
 
   createReview: protectedProcedure
     .input(
