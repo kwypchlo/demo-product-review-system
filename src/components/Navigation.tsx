@@ -13,13 +13,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { FiMoon, FiSun } from "react-icons/fi";
+import { SiGithub } from "react-icons/si";
 
-export default function Navigation() {
+export function Navigation() {
   const { colorMode, toggleColorMode } = useColorMode();
   const session = useSession();
 
   return (
-    <Flex bg={useColorModeValue("gray.100", "gray.900")} px={4} justifyContent="center">
+    <Flex bg={useColorModeValue("gray.100", "gray.900")} justifyContent="center">
       <Container as={Flex} h={16} alignItems={"center"} justifyContent={"space-between"} maxW="7xl" w="full" gap={4}>
         <Link href="/">
           <Image src="/favicon.svg" alt="Product Review System Logo" width={36} height={36} />
@@ -44,8 +45,8 @@ export default function Navigation() {
           )}
 
           {session.status !== "authenticated" && (
-            <Button type="button" onClick={() => signIn()} variant="outline">
-              Sign in
+            <Button type="button" onClick={() => signIn("github")} variant="outline" leftIcon={<SiGithub />}>
+              Sign in with GitHub
             </Button>
           )}
         </Stack>

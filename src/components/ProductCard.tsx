@@ -1,16 +1,17 @@
-import { AspectRatio, Box, HStack, Link, Skeleton, Stack, Text } from "@chakra-ui/react";
+import { AspectRatio, Box, HStack, Skeleton, Stack, Text } from "@chakra-ui/react";
 import { Rating } from "@smastrom/react-rating";
 import Image from "next/image";
-import { type RouterOutputs } from "@/utils/api";
+import Link from "next/link";
+import type { RouterOutputs } from "@/utils/api";
 
 type ProductCardProps = {
   product: RouterOutputs["products"]["getProducts"][number];
 };
 
-export default function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
   return (
     <Stack spacing={{ base: "4", md: "5" }}>
-      <Box as={Link} href={`/product/${product.id}`} position="relative">
+      <Box as={Link} href={`/product/${product.id}`}>
         <AspectRatio ratio={4 / 3} borderRadius={{ base: "md", md: "xl" }} overflow="hidden">
           <>
             <Skeleton width={240} height={180} />

@@ -12,7 +12,6 @@ import {
   HStack,
   Heading,
   Hide,
-  Link,
   Show,
   Skeleton,
   Text,
@@ -20,11 +19,29 @@ import {
 } from "@chakra-ui/react";
 import { Rating } from "@smastrom/react-rating";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { FiChevronsLeft } from "react-icons/fi";
-import sections from "./sections.json";
-import ProductReviewsWidget from "@/components/ProductReviewsWidget";
+import { ProductReviewsWidget } from "@/components/ProductReviewsWidget";
 import { api } from "@/utils/api";
+
+const sections = [
+  {
+    title: "License",
+    content:
+      "For personal and professional use. You cannot resell or redistribute these images in their original or modified state.",
+  },
+  {
+    title: "File Formats and Resolution",
+    content:
+      "Our artwork is provided in high-resolution JPEG and PNG formats, suitable for both digital and print use. For large-scale prints or detailed digital projects, we recommend utilizing the original resolution. If you have specific format requirements or questions, please reach out for assistance.",
+  },
+  {
+    title: "Usage Guidelines",
+    content:
+      "To maintain the artwork's integrity, please refrain from unauthorized modifications. Provide proper attribution when sharing, and differentiate between non-commercial and commercial use. Respect the artist's intentions and avoid any use that may be deemed inappropriate. For licensing inquiries or clarification on usage, feel free to contact us directly.",
+  },
+];
 
 export default function Product() {
   const router = useRouter();

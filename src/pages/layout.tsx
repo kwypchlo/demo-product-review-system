@@ -1,8 +1,8 @@
 import { Container, Flex } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
-import Navigation from "@/components/Navigation";
+import { Navigation } from "@/components/Navigation";
 
-export default function Layout({ children }: PropsWithChildren) {
+export function Layout({ children }: PropsWithChildren) {
   return (
     <Flex direction="column" flex="1">
       <Navigation />

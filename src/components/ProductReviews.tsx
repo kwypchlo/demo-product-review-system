@@ -1,8 +1,7 @@
-import { Box, Button, Center, Divider, Flex, Progress, Select, Spinner, Text, filter } from "@chakra-ui/react";
+import { Box, Button, Center, Divider, Flex, Select, Spinner, Text } from "@chakra-ui/react";
 import { Fragment, useState } from "react";
-import DividerWithContent from "./DividerWithContent";
-import Review from "./Review";
-import { products } from "@/server/db/schema";
+import { DividerWithContent } from "./DividerWithContent";
+import { Review } from "./Review";
 import { type RouterInputs, type RouterOutputs, api } from "@/utils/api";
 
 const orderByOptions = [
@@ -48,40 +47,51 @@ function parseOrderBy(orderBy: OrderByOption): OrderByInput {
   return { field, direction } as OrderByInput;
 }
 
-export default function ProductReviews({ product }: ProductReviewsProps) {
+export function ProductReviews({ product }: ProductReviewsProps) {
+  const [enableFetching, setEnableFetching] = useState(false);
   const [filterBy, setFilterBy] = useState<FilterByOption>("");
   const [orderBy, setOrderBy] = useState<OrderByOption>("date:desc");
 
-  const {
-    data: reviews,
-    isLoading,
-    isRefetching,
-  } = api.reviews.getProductReviews.useQuery(
+  const { data: reviews, isLoading } = api.reviews.getProductReviews.useQuery(
     { productId: product.id, orderBy: parseOrderBy(orderBy), filterBy: parseFilterBy(filterBy) },
-    { keepPreviousData: true },
+    { keepPreviousData: true, enabled: enableFetching, initialData: product.reviews },
   );
 
-  if (isLoading && !reviews) {
+  const onChangeOrderBy = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setEnableFetching(true);
+    setOrderBy(event.target.value as OrderByOption);
+  };
+
+  const onChangeFilterBy = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setEnableFetching(true);
+    setFilterBy(event.target.value as FilterByOption);
+  };
+
+  if (!reviews) {
+    if (isLoading) {
+      return (
+        <Center>
+          <Spinner />
+        </Center>
+      );
+    }
+
     return (
-      <Center>
-        <Spinner />
-      </Center>
+      <DividerWithContent>
+        <Text fontSize="sm" fontWeight="thin">
+          no reviews yet
+        </Text>
+      </DividerWithContent>
     );
   }
-
-  if (!reviews) return null;
 
   return (
     <Flex direction="column">
       <Flex flexDirection="row" justifyContent="flex-end" gap={4} alignItems="center">
-        {products && isRefetching && (
-          <Progress size="xs" isIndeterminate position="absolute" left={0} right={0} top={0} />
-        )}
-
         <Select
           placeholder={filterBy ? "Do not filter" : "Filter by"}
           maxW={200}
-          onChange={(event) => setFilterBy(event.target.value as FilterByOption)}
+          onChange={onChangeFilterBy}
           value={filterBy}
         >
           {filterByOptions.map((option) => (
@@ -91,7 +101,7 @@ export default function ProductReviews({ product }: ProductReviewsProps) {
           ))}
         </Select>
 
-        <Select maxW={250} onChange={(event) => setOrderBy(event.target.value as OrderByOption)}>
+        <Select maxW={250} onChange={onChangeOrderBy}>
           {orderByOptions.map((option) => (
             <option key={option.value} value={option.value}>
               Order By {option.label}
@@ -108,15 +118,15 @@ export default function ProductReviews({ product }: ProductReviewsProps) {
           </Fragment>
         ))}
 
-        {product.reviewCount > product.reviews.length && (
+        {product.reviewCount > reviews.length && (
           <DividerWithContent>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" onClick={() => setEnableFetching(true)}>
               Load more reviews
             </Button>
           </DividerWithContent>
         )}
 
-        {product.reviewCount === product.reviews.length && (
+        {product.reviewCount === reviews.length && (
           <DividerWithContent>
             <Text fontSize="sm" fontWeight="thin">
               no more reviews

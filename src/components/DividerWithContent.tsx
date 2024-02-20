@@ -1,7 +1,7 @@
 import { Box, Center, Divider } from "@chakra-ui/react";
-import { type PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 
-export default function DividerWithContent({ children }: PropsWithChildren) {
+export function DividerWithContent({ children }: PropsWithChildren) {
   return (
     <Center gap={2}>
       <Divider />

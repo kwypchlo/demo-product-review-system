@@ -1,6 +1,6 @@
 import { Center, Flex, Progress, Select } from "@chakra-ui/react";
 import { useState } from "react";
-import ProductCardPro from "@/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
 import { ProductGrid } from "@/components/ProductGrid";
 import { type RouterInputs, api } from "@/utils/api";
 
@@ -89,7 +89,7 @@ export default function Index() {
       {products && (
         <ProductGrid>
           {products.map((product) => (
-            <ProductCardPro key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </ProductGrid>
       )}

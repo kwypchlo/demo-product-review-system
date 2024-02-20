@@ -2,8 +2,8 @@ import { default as NextEnv } from "@next/env";
 import { eq } from "drizzle-orm";
 import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { generateProduct, generateProductReviews, generateUser } from "./generators";
 import { accounts, products, reviews, sessions, users } from "./schema";
-import { generateProduct, generateProductReviews, generateUser } from "@/utils/generators";
 
 NextEnv.loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 

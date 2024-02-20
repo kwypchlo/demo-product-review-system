@@ -2,7 +2,6 @@ import {
   Alert,
   AlertIcon,
   Button,
-  Divider,
   Tab,
   TabList,
   TabPanel,
@@ -12,11 +11,11 @@ import {
   VisuallyHidden,
 } from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";
-import { Fragment, useState } from "react";
-import DividerWithContent from "./DividerWithContent";
-import ProductReviews from "./ProductReviews";
-import Review from "./Review";
-import ReviewForm from "./ReviewForm";
+import { useState } from "react";
+import { SiGithub } from "react-icons/si";
+import { ProductReviews } from "./ProductReviews";
+import { Review } from "./Review";
+import { ReviewForm } from "./ReviewForm";
 import { type RouterOutputs, api } from "@/utils/api";
 
 const tabIndexes = {
@@ -29,7 +28,7 @@ type ProductReviewsWidgetProps = {
   product: NonNullable<RouterOutputs["products"]["getProductById"]>;
 };
 
-export default function ProductReviewsWidget({ product }: ProductReviewsWidgetProps) {
+export function ProductReviewsWidget({ product }: ProductReviewsWidgetProps) {
   const [tabIndex, setTabIndex] = useState(tabIndexes.latestReviews);
   const session = useSession();
   const { data: myReviews } = api.reviews.getMyProductReviews.useQuery(
@@ -40,42 +39,16 @@ export default function ProductReviewsWidget({ product }: ProductReviewsWidgetPr
   const myReview = myReviews?.[0]; // only one review per product per user
 
   return (
-    <Tabs index={tabIndex} onChange={(index: number) => setTabIndex(index)} isLazy size={["sm", "md"]}>
+    <Tabs index={tabIndex} onChange={(index: number) => setTabIndex(index)}>
       <TabList>
-        <Tab>Latest Reviews</Tab>
-        <Tab>All Reviews ({product.reviewCount})</Tab>
+        <Tab>Product Reviews ({product.reviewCount})</Tab>
         <Tab>{!myReview && "Submit"} Your Review</Tab>
       </TabList>
 
       <TabPanels>
         <TabPanel>
           <VisuallyHidden>
-            <h3>Latest Reviews</h3>
-          </VisuallyHidden>
-          {product.reviews.map((review, reviewIdx) => (
-            <Fragment key={review.id}>
-              <Review review={review} />
-              {reviewIdx < product.reviews.length - 1 && <Divider />}
-            </Fragment>
-          ))}
-
-          {product.reviewCount > product.reviews.length && (
-            <DividerWithContent>
-              <Button type="button" variant="outline" onClick={() => setTabIndex(tabIndexes.allReviews)}>
-                See all {product.reviewCount} reviews
-              </Button>
-            </DividerWithContent>
-          )}
-
-          {product.reviewCount === product.reviews.length && (
-            <DividerWithContent>
-              <Text fontSize="sm">no more reviews</Text>
-            </DividerWithContent>
-          )}
-        </TabPanel>
-        <TabPanel>
-          <VisuallyHidden>
-            <h3>All Reviews</h3>
+            <h3>Product Reviews</h3>
           </VisuallyHidden>
           <ProductReviews product={product} />
         </TabPanel>
@@ -87,9 +60,9 @@ export default function ProductReviewsWidget({ product }: ProductReviewsWidgetPr
           {session.status === "unauthenticated" && (
             <Alert status="info">
               <AlertIcon />
-              <Text>You have to be signed in to submit a review</Text>
-              <Button type="button" onClick={() => signIn()} ml="auto">
-                Sign in
+              <Text mr={3}>You have to be signed in to submit a review</Text>
+              <Button type="button" onClick={() => signIn("github")} ml="auto" size="sm" leftIcon={<SiGithub />}>
+                Sign in with GitHub
               </Button>
             </Alert>
           )}

@@ -12,6 +12,7 @@ import {
   Textarea,
   VStack,
   VisuallyHidden,
+  useColorModeValue,
   useToast,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,19 +23,15 @@ import { FiSend } from "react-icons/fi";
 import { z } from "zod";
 import { api } from "@/utils/api";
 
-type Inputs = {
-  content: string;
-  rating: number;
-};
-
-const schema = z.object({
+const inputsSchema = z.object({
   content: z.string().min(1, "Review content cannot be empty.").max(360, "Review content is too long."),
   rating: z.number().int().min(1, "Please select review rating.").max(5),
 });
 
-export default function ReviewForm({ productId }: { productId: string }) {
+export function ReviewForm({ productId }: { productId: string }) {
   const toast = useToast();
   const utils = api.useUtils();
+  const errorColor = useColorModeValue("red.500", "red.300");
 
   // use useState to get a reference to the form element instead of using
   // useRef to be able to use the form element in the useEffect hook
@@ -46,8 +43,8 @@ export default function ReviewForm({ productId }: { productId: string }) {
     control,
     reset,
     formState: { errors },
-  } = useForm<Inputs>({
-    resolver: zodResolver(schema),
+  } = useForm<z.infer<typeof inputsSchema>>({
+    resolver: zodResolver(inputsSchema),
     defaultValues: {
       rating: 0,
     },
@@ -72,7 +69,7 @@ export default function ReviewForm({ productId }: { productId: string }) {
     },
   });
 
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+  const onSubmit: SubmitHandler<z.infer<typeof inputsSchema>> = async (data) => {
     mutate({ productId, ...data });
   };
 
@@ -111,7 +108,7 @@ export default function ReviewForm({ productId }: { productId: string }) {
               />
             )}
           />
-          <Text color={errors.rating ? "red" : undefined}>Select your rating</Text>
+          <Text color={errors.rating ? errorColor : undefined}>Select your rating</Text>
         </Flex>
 
         <FormControl isInvalid={!!errors.content}>
@@ -128,7 +125,7 @@ export default function ReviewForm({ productId }: { productId: string }) {
 
         <Flex justifyContent="flex-end" alignItems="center">
           <VStack spacing={2} alignItems="flex-end">
-            <Button type="submit" isLoading={isLoading} colorScheme="green" leftIcon={<FiSend />}>
+            <Button type="submit" isLoading={isLoading} colorScheme="blue" leftIcon={<FiSend />}>
               Submit
             </Button>
             <Hide below="md">

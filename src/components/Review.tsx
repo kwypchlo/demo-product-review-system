@@ -8,7 +8,7 @@ type ReviewProps = {
   review: RouterOutputs["products"]["getProductReviews"][number];
 };
 
-export default function Review({ review }: ReviewProps) {
+export function Review({ review }: ReviewProps) {
   const session = useSession();
   const toast = useToast();
   const utils = api.useUtils();
