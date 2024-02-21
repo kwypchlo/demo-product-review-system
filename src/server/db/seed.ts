@@ -1,5 +1,5 @@
 import { default as NextEnv } from "@next/env";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import { execa } from "execa";
 import postgres from "postgres";
@@ -26,11 +26,10 @@ void (async () => {
 
   // database teardown
   console.log("tearing down database");
-  await db.delete(sessions);
-  await db.delete(accounts);
-  await db.delete(reviews);
-  await db.delete(products);
-  await db.delete(users);
+
+  await db.execute(
+    sql`DROP TABLE IF EXISTS "product-review-system_session", "product-review-system_account", "product-review-system_reviews", "product-review-system_products", "product-review-system_user";`,
+  );
 
   // push current schema to database
   console.log("push current schema to database");
