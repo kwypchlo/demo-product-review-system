@@ -1,6 +1,7 @@
-import { Box, Button, Center, Divider, Flex, Select, Spinner, Text } from "@chakra-ui/react";
-import { Fragment, useState } from "react";
-import { DividerWithContent } from "./DividerWithContent";
+import { Box, Button, Center, Divider, Flex, Select, Spinner } from "@chakra-ui/react";
+import { Fragment, useMemo, useState } from "react";
+import useInfiniteScroll from "react-infinite-scroll-hook";
+import { DividerWithContent, DividerWithText } from "./Dividers";
 import { Review } from "./Review";
 import { type RouterInputs, type RouterOutputs, api } from "@/utils/api";
 
@@ -48,22 +49,35 @@ function parseOrderBy(orderBy: OrderByOption): OrderByInput {
 }
 
 export function ProductReviews({ product }: ProductReviewsProps) {
-  const [enableFetching, setEnableFetching] = useState(false);
   const [filterBy, setFilterBy] = useState<FilterByOption>("");
   const [orderBy, setOrderBy] = useState<OrderByOption>("date:desc");
 
-  const { data: reviews, isLoading } = api.reviews.getProductReviews.useQuery(
-    { productId: product.id, orderBy: parseOrderBy(orderBy), filterBy: parseFilterBy(filterBy) },
-    { keepPreviousData: true, enabled: enableFetching, initialData: product.reviews },
-  );
+  const { data, error, isLoading, isRefetching, fetchNextPage, hasNextPage } =
+    api.reviews.getProductReviewsInfinite.useInfiniteQuery(
+      { productId: product.id, orderBy: parseOrderBy(orderBy), filterBy: parseFilterBy(filterBy) },
+      {
+        getNextPageParam: ({ nextCursor }) => nextCursor,
+        // placeholderData: true,
+      },
+    );
+
+  const reviews = useMemo(() => {
+    return data?.pages.flatMap((page) => page.data);
+  }, [data]);
+
+  const [sentryRef] = useInfiniteScroll({
+    loading: isLoading || isRefetching,
+    hasNextPage: !!hasNextPage,
+    onLoadMore: () => void fetchNextPage(),
+    disabled: !!error,
+    rootMargin: "0px 0px 400px 0px",
+  });
 
   const onChangeOrderBy = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setEnableFetching(true);
     setOrderBy(event.target.value as OrderByOption);
   };
 
   const onChangeFilterBy = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setEnableFetching(true);
     setFilterBy(event.target.value as FilterByOption);
   };
 
@@ -76,13 +90,7 @@ export function ProductReviews({ product }: ProductReviewsProps) {
       );
     }
 
-    return (
-      <DividerWithContent>
-        <Text fontSize="sm" fontWeight="thin">
-          no reviews yet
-        </Text>
-      </DividerWithContent>
-    );
+    return <DividerWithText text="no reviews yet" />;
   }
 
   return (
@@ -118,21 +126,15 @@ export function ProductReviews({ product }: ProductReviewsProps) {
           </Fragment>
         ))}
 
-        {product.reviewCount > reviews.length && (
+        {hasNextPage === true && (
           <DividerWithContent>
-            <Button type="button" variant="outline" onClick={() => setEnableFetching(true)}>
-              Load more reviews
+            <Button type="button" variant="outline" onClick={() => fetchNextPage()} ref={sentryRef}>
+              more reviews
             </Button>
           </DividerWithContent>
         )}
 
-        {product.reviewCount === reviews.length && (
-          <DividerWithContent>
-            <Text fontSize="sm" fontWeight="thin">
-              no more reviews
-            </Text>
-          </DividerWithContent>
-        )}
+        {hasNextPage === false && <DividerWithText text="no more reviews" />}
       </Box>
     </Flex>
   );

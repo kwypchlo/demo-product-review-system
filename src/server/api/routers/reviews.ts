@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { withCursorPagination } from "drizzle-pagination";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { products, reviews } from "@/server/db/schema";
@@ -63,6 +64,62 @@ export const reviewsRouter = createTRPCRouter({
           author: true,
         },
       });
+    }),
+
+  getProductReviewsInfinite: publicProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            orderBy: z.any(),
+            id: z.number().int().nonnegative(),
+          })
+          .optional(),
+        limit: z.number().int().nonnegative().default(20),
+        productId: z.number().int().nonnegative(),
+        orderBy: z.object({
+          field: z.enum(["date", "rating"]),
+          direction: z.enum(["asc", "desc"]),
+        }),
+        filterBy: z
+          .object({
+            field: z.enum(["rating"]),
+            comparison: z.enum([">=", "<=", "=="]),
+            value: z.number().int().min(1).max(5),
+          })
+          .optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const data = await ctx.db.query.reviews.findMany({
+        ...withCursorPagination({
+          limit: input.limit,
+          where: input.filterBy
+            ? and(
+                eq(reviews.productId, input.productId),
+                { ">=": gte, "<=": lte, "==": eq }[input.filterBy.comparison](
+                  reviews[input.filterBy.field],
+                  input.filterBy.value,
+                ),
+              )
+            : eq(reviews.productId, input.productId),
+          cursors: [
+            [reviews[input.orderBy.field], input.orderBy.direction, input.cursor?.orderBy],
+            [reviews.id, "desc", input.cursor?.id],
+          ],
+        }),
+        with: {
+          author: true,
+        },
+      });
+
+      const next = data[input.limit - 1];
+
+      if (next) {
+        return { data, nextCursor: { orderBy: next[input.orderBy.field], id: next.id } };
+      }
+
+      return { data, nextCursor: null };
     }),
 
   createReview: protectedProcedure

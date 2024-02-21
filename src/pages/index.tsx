@@ -1,7 +1,7 @@
-import { Button, Center, Flex, Progress, Select } from "@chakra-ui/react";
+import { Button, Center, Flex, Progress, Select, Text } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import useInfiniteScroll from "react-infinite-scroll-hook";
-import { DividerWithContent } from "@/components/DividerWithContent";
+import { DividerWithContent, DividerWithText } from "@/components/Dividers";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductGrid } from "@/components/ProductGrid";
 import { type RouterInputs, api } from "@/utils/api";
@@ -54,7 +54,7 @@ export default function Index() {
       },
       {
         getNextPageParam: ({ nextCursor }) => nextCursor,
-        keepPreviousData: true,
+        // placeholderData: true,
       },
     );
 
@@ -111,13 +111,15 @@ export default function Index() {
         </ProductGrid>
       )}
 
-      {hasNextPage && (
+      {hasNextPage === true && (
         <DividerWithContent>
           <Button type="button" variant="outline" onClick={() => fetchNextPage()} ref={sentryRef}>
-            Load more products
+            more products
           </Button>
         </DividerWithContent>
       )}
+
+      {hasNextPage === false && <DividerWithText text="no more products" />}
     </Flex>
   );
 }

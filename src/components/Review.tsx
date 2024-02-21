@@ -5,7 +5,7 @@ import { FiTrash } from "react-icons/fi";
 import { type RouterOutputs, api } from "@/utils/api";
 
 type ReviewProps = {
-  review: RouterOutputs["products"]["getProductReviews"][number];
+  review: RouterOutputs["reviews"]["getProductReviews"][number];
 };
 
 export function Review({ review }: ReviewProps) {
@@ -15,12 +15,9 @@ export function Review({ review }: ReviewProps) {
   const { mutate: deleteReview } = api.reviews.deleteReview.useMutation({
     onSuccess: () => {
       void utils.products.getProductById.invalidate({ id: review.productId });
-      void utils.products.getProductReviews.invalidate({
-        productId: review.productId,
-      });
-      void utils.reviews.getMyProductReviews.invalidate({
-        productId: review.productId,
-      });
+      void utils.reviews.getProductReviews.invalidate({ productId: review.productId });
+      void utils.reviews.getProductReviewsInfinite.invalidate({ productId: review.productId });
+      void utils.reviews.getMyProductReviews.invalidate({ productId: review.productId });
 
       toast({ title: "Your review has been deleted.", status: "success" });
     },

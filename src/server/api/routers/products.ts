@@ -93,27 +93,6 @@ export const productsRouter = createTRPCRouter({
     .query(({ ctx, input: { id } }) => {
       return ctx.db.query.products.findFirst({
         where: (users, { eq }) => eq(users.id, id),
-        with: {
-          reviews: {
-            limit: 3,
-            orderBy: [desc(reviews.date)],
-            with: {
-              author: true,
-            },
-          },
-        },
-      });
-    }),
-
-  getProductReviews: publicProcedure
-    .input(z.object({ productId: z.number().int().nonnegative() }))
-    .query(async ({ ctx, input }) => {
-      return ctx.db.query.reviews.findMany({
-        where: (reviews, { eq }) => eq(reviews.productId, input.productId),
-        orderBy: [desc(reviews.date)],
-        with: {
-          author: true,
-        },
       });
     }),
 });
