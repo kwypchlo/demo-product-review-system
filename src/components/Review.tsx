@@ -33,7 +33,7 @@ export function Review({ review }: ReviewProps) {
   const isAuthor = session.data?.user.id === review.author.id;
 
   return (
-    <Flex gap={4} py={4}>
+    <Flex gap={4} py={4} data-testid="review">
       <Avatar src={review.author.image!} name={review.author.name!} bg={useColorModeValue("gray.100", "gray.900")} />
 
       <Flex direction="column" gap={2} flex={1}>

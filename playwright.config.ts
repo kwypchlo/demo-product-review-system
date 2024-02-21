@@ -1,4 +1,7 @@
+import { default as NextEnv } from "@next/env";
 import { defineConfig, devices } from "@playwright/test";
+
+NextEnv.loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 
 /**
  * Read environment variables from file.

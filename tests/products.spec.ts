@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { insertProduct, insertReview } from "./utils";
 
-test.beforeEach(async ({ page }) => {
+test("should display product cards on main page", async ({ page }) => {
+  await insertProduct();
+
   await page.goto("/");
-});
 
-test("should display at least one product card", async ({ page }) => {
   const productCard = page.getByTestId("product-card").first();
 
   // expect product card to be visible
@@ -24,17 +25,23 @@ test("should display at least one product card", async ({ page }) => {
 });
 
 test("should navigate to product page when clicking on a product card", async ({ page }) => {
-  const productCardName = await page.getByTestId("product-card-name").first().textContent();
+  const product = await insertProduct({ rating: 3, reviewCount: 2 });
+  await Promise.all([
+    insertReview(product.id, undefined, { rating: 2 }),
+    insertReview(product.id, undefined, { rating: 4 }),
+  ]);
 
-  // expect product card to have a name
-  expect(productCardName).not.toBeNull();
+  await page.goto("/");
 
   // click on the first product card name
-  await page.getByTestId("product-card-name").first().click();
+  await page.getByText(product.name).first().click();
 
   // expect to navigate to product page
-  await expect(page).toHaveURL(/\/product\/[0-9a-f-]+/);
+  await expect(page).toHaveURL("/product/" + product.id);
 
   // expect product name to be displayed on the product page
-  await expect(page.getByTestId("product-name")).toHaveText(productCardName!);
+  await expect(page.getByText(product.name)).toBeVisible();
+
+  // expect product card to have a rating
+  await expect(page.getByText("3 out of 2 reviews")).toBeVisible();
 });

@@ -39,7 +39,7 @@ export function ProductReviewsWidget({ product }: ProductReviewsWidgetProps) {
   const myReview = myReviews?.[0]; // only one review per product per user
 
   return (
-    <Tabs index={tabIndex} onChange={(index: number) => setTabIndex(index)}>
+    <Tabs index={tabIndex} onChange={(index: number) => setTabIndex(index)} isLazy>
       <TabList>
         <Tab>Product Reviews ({product.reviewCount})</Tab>
         <Tab>{!myReview && "Submit"} Your Review</Tab>

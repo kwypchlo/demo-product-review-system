@@ -10,20 +10,19 @@ export const generateProduct = (overrides = {}) => {
     material: faker.commerce.productMaterial(),
     color: faker.color.human(),
     tags: [faker.commerce.productAdjective()],
-    rating: faker.number.float({ min: 1, max: 5, fractionDigits: 2 }),
-    reviewCount: faker.number.int({ min: 0, max: 100 }),
     image: faker.image.urlPicsumPhotos({ width: 480, height: 360 }),
     ...overrides,
   };
 };
 
-export const generateReview = (productId: string, authorId: string) => {
+export const generateReview = (productId: string, authorId: string, overrides = {}) => {
   return {
     productId,
     authorId,
     rating: faker.number.int({ min: 1, max: 5 }),
     content: faker.lorem.paragraph({ min: 1, max: 10 }),
     date: faker.date.recent({ days: 365, refDate: new Date() }),
+    ...overrides,
   };
 };
 
