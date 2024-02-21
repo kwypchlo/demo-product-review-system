@@ -24,9 +24,12 @@ Demo: https://product-review-system.vercel.app/
       - "GITHUB_ID" - copy "Client ID"
       - "GITHUB_SECRET" - copy newly generated client secret
    1. Confirm changes with "Update application"
-1. Optional: Uncomment and set "NEXTAUTH_SECRET" in .env file (instructions in the file)
-1. Run ./start-database.sh (Docker has to be running)
-1. `npm run db:seed` (or `npm run db:push` to bootstrap without any data)
+1. Set "NEXTAUTH_SECRET" in .env file
+   - generate random secret with `openssl rand -base64 32`
+1. Run `./start-database.sh` (Docker has to be running)
+   - follow instructions - select `y` to generate a random password
+   - in case of getting "bad flag in substitute command" error, delete the database in docker and try again or set your password manually
+1. Run `npm run db:push` to bootstrap the database schema
 
 ### Seeding database
 
@@ -59,7 +62,7 @@ Currently, demo app is deployed to Vercel and as the application runs on Next.js
 
 Follow the steps to set up a new OAuth application on your GitHub account from "First time installation steps". Every enviroment requires a separate OAuth application. When configuring the OAuth application, use Vercel's production url.
 
-- "Homepage URL" - https://your-project-name.vercel.app:3000
+- "Homepage URL" - https://your-project-name.vercel.app
 - "Authorization callback URL" - http://your-project-name.vercel.app/api/auth/callback/github
 
 After the OAuth application is created, go to your project settings on Vercel dashboard and select "Environment Variables" from the left side panel. Add new variables "GITHUB_ID" and "GITHUB_SECRET" with the values from your production OAuth GitHub application.
