@@ -1,6 +1,7 @@
 import { default as NextEnv } from "@next/env";
 import { eq } from "drizzle-orm";
 import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
+import { execa } from "execa";
 import postgres from "postgres";
 import { generateProduct, generateProductReviews, generateUser } from "./generators";
 import { accounts, products, reviews, sessions, users } from "./schema";
@@ -30,6 +31,10 @@ void (async () => {
   await db.delete(reviews);
   await db.delete(products);
   await db.delete(users);
+
+  // push current schema to database
+  console.log("push current schema to database");
+  await execa("npm", ["run", "db:push"], { stdio: "inherit" });
 
   // database setup
   console.log("seed database with data");
