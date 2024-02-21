@@ -1,10 +1,12 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { eq } from "drizzle-orm";
 import { type GetServerSidePropsContext } from "next";
 import { type DefaultSession, type NextAuthOptions, getServerSession } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
+import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 import { db } from "@/server/db";
-import { createTable } from "@/server/db/schema";
+import { createTable, users } from "@/server/db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -27,6 +29,24 @@ declare module "next-auth" {
   // }
 }
 
+const devProviders = [];
+
+// credential provider only available for development
+if (process.env.NODE_ENV === "development") {
+  devProviders.push(
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {},
+      async authorize() {
+        // ensure the user exists, it's a hardcoded user for development in seed script
+        const [user] = await db.select().from(users).where(eq(users.id, "test")).limit(1);
+
+        return user ?? null;
+      },
+    }),
+  );
+}
+
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
  *
@@ -34,21 +54,29 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, user, token }) => {
+      const id = user?.id ?? token?.sub ?? null;
+
+      if (id) {
+        return { ...session, user: { ...session.user, id } };
+      }
+
+      return session;
+    },
   },
   adapter: DrizzleAdapter(db, createTable) as Adapter,
   providers: [
+    ...devProviders,
     GithubProvider({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
     }),
   ],
+  debug: process.env.NODE_ENV === "development",
+  session: {
+    // jwt vs database: https://next-auth.js.org/configuration/options#jwt
+    strategy: process.env.NODE_ENV === "development" ? "jwt" : "database",
+  },
 };
 
 /**
