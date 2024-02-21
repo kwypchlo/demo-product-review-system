@@ -18,7 +18,7 @@ function chunk<T>(array: T[], chunkSize = 1, cache: T[][] = []) {
 }
 
 void (async () => {
-  // reusing images to save vercel compute time on image generation
+  // reusing images because regenerating image cache on every redeploy causes vercel's fair usage policy to be exceeded
   console.log("collecting previous images to reuse");
   const prevProductData = await db.selectDistinctOn([products.image], { image: products.image }).from(products);
   const prevUserData = await db.selectDistinctOn([users.image], { image: users.image }).from(users);
@@ -34,7 +34,8 @@ void (async () => {
   // database setup
   console.log("seed database with data");
 
-  const usersData = new Array(100).fill(null).map(() => generateUser(prevUserData.pop()));
+  const usersData = new Array(99).fill(null).map(() => generateUser(prevUserData.pop()));
+  usersData.push(generateUser({ id: "test" })); // generate one user with known id for dev authentication
   const productsData = new Array(300).fill(null).map(() => generateProduct(prevProductData.pop()));
 
   console.log("·", `inserting ${usersData.length} users`);
