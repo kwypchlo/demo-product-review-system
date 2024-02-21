@@ -10,7 +10,7 @@ type ProductCardProps = {
 
 export function ProductCard({ product }: ProductCardProps) {
   return (
-    <Stack spacing={{ base: "4", md: "5" }} data-testid="product-card">
+    <Stack spacing={{ base: "4", md: "5" }} title={product.name}>
       <Box as={Link} href={`/product/${product.id}`}>
         <AspectRatio ratio={4 / 3} borderRadius={{ base: "md", md: "xl" }} overflow="hidden">
           <>

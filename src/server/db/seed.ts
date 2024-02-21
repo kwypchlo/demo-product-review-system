@@ -42,7 +42,7 @@ void (async () => {
   const productsData = new Array(300).fill(null).map(() => generateProduct(prevProductData.pop()));
 
   console.log("·", `inserting ${usersData.length} users`);
-  const usersResp = await db.insert(users).values(usersData).returning();
+  const usersResp = await db.insert(users).values(usersData).onConflictDoNothing({ target: users.id }).returning();
 
   console.log("·", `inserting ${productsData.length} products`);
   const productsResp = await db.insert(products).values(productsData).returning();

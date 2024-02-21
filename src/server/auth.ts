@@ -41,7 +41,18 @@ if (process.env.NODE_ENV === "development") {
         // ensure the user exists, it's a hardcoded user for development in seed script
         const [user] = await db.select().from(users).where(eq(users.id, "test")).limit(1);
 
-        return user ?? null;
+        if (user) return user;
+
+        // if the test user doesn't exist, create it
+        const { generateUser } = await import("@/server/db/generators");
+
+        const [newUser] = await db
+          .insert(users)
+          .values(generateUser({ id: "test" }))
+          .onConflictDoNothing({ target: users.id })
+          .returning();
+
+        return newUser ?? null;
       },
     }),
   );

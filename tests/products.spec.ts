@@ -2,23 +2,25 @@ import { expect, test } from "@playwright/test";
 import { insertProduct, insertReview } from "./utils";
 
 test("should display product cards on main page", async ({ page }) => {
-  await insertProduct();
+  const product = await insertProduct({ rating: 3, reviewCount: 2 });
+  await Promise.all([
+    insertReview(product.id, undefined, { rating: 2 }),
+    insertReview(product.id, undefined, { rating: 4 }),
+  ]);
 
   await page.goto("/");
 
-  const productCard = page.getByTestId("product-card").first();
-
   // expect product card to be visible
-  await expect(productCard).toBeVisible();
+  await expect(page.getByTitle(product.name)).toBeVisible();
 
   // expect product card to have a name
-  await expect(productCard.getByTestId("product-card-name")).not.toBeEmpty();
+  await expect(page.getByTitle(product.name)).toContainText(product.name);
 
   // expect product card to have a reviews count
-  await expect(productCard.getByTestId("product-card-review-count")).toHaveText(/\d+ Reviews/);
+  await expect(page.getByTitle(product.name)).toContainText(`${product.reviewCount} Reviews`);
 
   // expect product card to have a rating component rendered
-  await expect(productCard.getByTestId("product-card-rating").getByRole("img")).toHaveAttribute(
+  await expect(page.getByTitle(product.name).getByTestId("product-card-rating").getByRole("img")).toHaveAttribute(
     "aria-label",
     /[\d.]+ on 5/,
   );

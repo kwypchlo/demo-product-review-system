@@ -50,6 +50,7 @@ export async function insertUser(overrides = {}) {
   const [result] = await db
     .insert(users)
     .values(generateUser({ ...image, ...overrides }))
+    .onConflictDoNothing({ target: users.id })
     .returning();
 
   return result!;
