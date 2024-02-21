@@ -43,12 +43,14 @@ if (process.env.NODE_ENV === "development") {
 
         if (user) return user;
 
-        // if the test user doesn't exist, create it
-        const { generateUser } = await import("@/server/db/generators");
-
         const [newUser] = await db
           .insert(users)
-          .values(generateUser({ id: "test" }))
+          .values({
+            id: "test",
+            name: "Linus Torvalds",
+            email: "torvalds@osdl.org",
+            image: "https://avatars.githubusercontent.com/u/1024025",
+          })
           .onConflictDoNothing({ target: users.id })
           .returning();
 
