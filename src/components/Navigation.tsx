@@ -49,7 +49,7 @@ export function Navigation() {
 
           {process.env.NODE_ENV === "development" && session.status !== "authenticated" && (
             <Button onClick={() => signIn("credentials")} leftIcon={<FiCode />} data-testid="sign-in-dev">
-              <Hide below="md">Sign in as</Hide> Dev
+              <Hide below="md">Sign in with</Hide> Dev
             </Button>
           )}
 

@@ -35,7 +35,7 @@ const devProviders = [];
 if (process.env.NODE_ENV === "development") {
   devProviders.push(
     CredentialsProvider({
-      name: "Credentials",
+      name: "Dev",
       credentials: {},
       async authorize() {
         // ensure the user exists, it's a hardcoded user for development in seed script
