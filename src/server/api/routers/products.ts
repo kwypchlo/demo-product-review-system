@@ -1,8 +1,8 @@
-import { desc, eq, gte, lte } from "drizzle-orm";
+import { eq, gte, lte } from "drizzle-orm";
 import { withCursorPagination } from "drizzle-pagination";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { products, reviews } from "@/server/db/schema";
+import { products } from "@/server/db/schema";
 
 export const productsRouter = createTRPCRouter({
   getProducts: publicProcedure

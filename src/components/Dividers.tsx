@@ -1,5 +1,5 @@
-import { Box, Button, ButtonProps, Center, Divider, Text, type TextProps } from "@chakra-ui/react";
-import { type PropsWithChildren, forwardRef } from "react";
+import { Box, Center, Divider, Text, type TextProps } from "@chakra-ui/react";
+import type { PropsWithChildren } from "react";
 
 export function DividerWithContent({ children }: PropsWithChildren) {
   return (

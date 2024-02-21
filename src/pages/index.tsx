@@ -1,4 +1,4 @@
-import { Button, Center, Flex, Progress, Select, Text } from "@chakra-ui/react";
+import { Button, Center, Flex, Progress, Select } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
 import useInfiniteScroll from "react-infinite-scroll-hook";
 import { DividerWithContent, DividerWithText } from "@/components/Dividers";
