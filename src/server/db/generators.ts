@@ -15,7 +15,7 @@ export const generateProduct = (overrides = {}) => {
   };
 };
 
-export const generateReview = (productId: string, authorId: string, overrides = {}) => {
+export const generateReview = (productId: number, authorId: string, overrides = {}) => {
   return {
     productId,
     authorId,
@@ -26,7 +26,7 @@ export const generateReview = (productId: string, authorId: string, overrides = 
   };
 };
 
-export const generateProductReviews = (productId: string, authorIds: string[]) => {
+export const generateProductReviews = (productId: number, authorIds: string[]) => {
   authorIds = authorIds.slice(); // copy the array
   return new Array(faker.number.int({ min: 1, max: Math.min(50, authorIds.length) })).fill(null).map(() => {
     faker.helpers.shuffle(authorIds, { inplace: true }); // shuffle the array in place

@@ -1,5 +1,4 @@
 import { SimpleGrid, type SimpleGridProps } from "@chakra-ui/react";
-import { Children, isValidElement, useMemo } from "react";
 
 export const ProductGrid = (props: SimpleGridProps) => {
   return (

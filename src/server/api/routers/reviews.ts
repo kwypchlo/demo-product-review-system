@@ -6,7 +6,7 @@ import { products, reviews } from "@/server/db/schema";
 
 export const reviewsRouter = createTRPCRouter({
   getMyProductReviews: protectedProcedure
-    .input(z.object({ productId: z.string().uuid() }))
+    .input(z.object({ productId: z.number().int().nonnegative() }))
     .query(async ({ ctx, input }) => {
       return ctx.db.query.reviews.findMany({
         where: (reviews, { and, eq }) => {
@@ -21,7 +21,7 @@ export const reviewsRouter = createTRPCRouter({
   getProductReviews: publicProcedure
     .input(
       z.object({
-        productId: z.string().uuid(),
+        productId: z.number().int().nonnegative(),
         orderBy: z.object({
           field: z.enum(["date", "rating"]),
           direction: z.enum(["asc", "desc"]),
@@ -68,7 +68,7 @@ export const reviewsRouter = createTRPCRouter({
   createReview: protectedProcedure
     .input(
       z.object({
-        productId: z.string().uuid(),
+        productId: z.number().int().nonnegative(),
         content: z.string().min(1).max(360),
         rating: z.number().int().min(1).max(5),
       }),
@@ -95,30 +95,32 @@ export const reviewsRouter = createTRPCRouter({
       });
     }),
 
-  deleteReview: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-    await ctx.db.transaction(async (db) => {
-      const deletedReviews = await db
-        .delete(reviews)
-        .where(and(eq(reviews.id, input.id), eq(reviews.authorId, ctx.session.user.id)))
-        .returning();
+  deleteReview: protectedProcedure
+    .input(z.object({ id: z.number().int().nonnegative() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.transaction(async (db) => {
+        const deletedReviews = await db
+          .delete(reviews)
+          .where(and(eq(reviews.id, input.id), eq(reviews.authorId, ctx.session.user.id)))
+          .returning();
 
-      if (!deletedReviews.length) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Review not found",
-        });
-      }
+        if (!deletedReviews.length) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Review not found",
+          });
+        }
 
-      await db
-        .update(products)
-        .set({
-          reviewCount: sql`${products.reviewCount} - 1`,
-          rating: sql`${db
-            .select({ rating: sql`AVG(${reviews.rating})` })
-            .from(reviews)
-            .where(eq(reviews.productId, deletedReviews[0]!.productId))}`,
-        })
-        .where(eq(products.id, deletedReviews[0]!.productId));
-    });
-  }),
+        await db
+          .update(products)
+          .set({
+            reviewCount: sql`${products.reviewCount} - 1`,
+            rating: sql`${db
+              .select({ rating: sql`AVG(${reviews.rating})` })
+              .from(reviews)
+              .where(eq(reviews.productId, deletedReviews[0]!.productId))}`,
+          })
+          .where(eq(products.id, deletedReviews[0]!.productId));
+      });
+    }),
 });

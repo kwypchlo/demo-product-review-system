@@ -28,7 +28,7 @@ const inputsSchema = z.object({
   rating: z.number().int().min(1, "Please select review rating.").max(5),
 });
 
-export function ReviewForm({ productId }: { productId: string }) {
+export function ReviewForm({ productId }: { productId: number }) {
   const toast = useToast();
   const utils = api.useUtils();
   const errorColor = useColorModeValue("red.500", "red.300");

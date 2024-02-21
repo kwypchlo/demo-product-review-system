@@ -46,7 +46,7 @@ const sections = [
 export default function Product() {
   const router = useRouter();
   const { data: product, isLoading } = api.products.getProductById.useQuery(
-    { id: router.query.id as string },
+    { id: parseInt(router.query.id as string, 10) },
     { enabled: router.isReady },
   );
 

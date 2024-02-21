@@ -10,7 +10,6 @@ import {
   text,
   timestamp,
   unique,
-  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -116,7 +115,7 @@ export const verificationTokens = createTable(
 );
 
 export const products = createTable("products", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description").notNull(),
   rating: doublePrecision("rating").default(0).notNull(),
@@ -131,11 +130,11 @@ export const productsRelations = relations(products, ({ many }) => ({
 export const reviews = createTable(
   "reviews",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: serial("id").primaryKey(),
     rating: smallint("rating").notNull(),
     content: text("content").notNull(),
     date: timestamp("date", { mode: "date" }).defaultNow().notNull(),
-    productId: uuid("product_id")
+    productId: integer("product_id")
       .notNull()
       .references(() => products.id),
     authorId: varchar("author_id", { length: 255 })

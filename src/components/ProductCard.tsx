@@ -1,4 +1,4 @@
-import { AspectRatio, Box, HStack, Skeleton, Stack, Text } from "@chakra-ui/react";
+import { AspectRatio, Box, Skeleton, Stack, Text } from "@chakra-ui/react";
 import { Rating } from "@smastrom/react-rating";
 import Image from "next/image";
 import Link from "next/link";

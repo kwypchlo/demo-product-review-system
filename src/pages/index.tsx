@@ -1,5 +1,7 @@
-import { Center, Flex, Progress, Select } from "@chakra-ui/react";
-import { useState } from "react";
+import { Button, Center, Flex, Progress, Select } from "@chakra-ui/react";
+import { useMemo, useState } from "react";
+import useInfiniteScroll from "react-infinite-scroll-hook";
+import { DividerWithContent } from "@/components/DividerWithContent";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductGrid } from "@/components/ProductGrid";
 import { type RouterInputs, api } from "@/utils/api";
@@ -44,14 +46,29 @@ export default function Index() {
   const [filterBy, setFilterBy] = useState<FilterByOption>("");
   const [orderBy, setOrderBy] = useState<OrderByOption>("name:asc");
 
-  const {
-    data: products,
-    isLoading,
-    isRefetching,
-  } = api.products.getProducts.useQuery(
-    { orderBy: parseOrderBy(orderBy), filterBy: parseFilterBy(filterBy) },
-    { keepPreviousData: true },
-  );
+  const { data, error, isLoading, isRefetching, fetchNextPage, hasNextPage } =
+    api.products.getProductsInfinite.useInfiniteQuery(
+      {
+        orderBy: parseOrderBy(orderBy),
+        filterBy: parseFilterBy(filterBy),
+      },
+      {
+        getNextPageParam: ({ nextCursor }) => nextCursor,
+        keepPreviousData: true,
+      },
+    );
+
+  const products = useMemo(() => {
+    return data?.pages.flatMap((page) => page.data);
+  }, [data]);
+
+  const [sentryRef] = useInfiniteScroll({
+    loading: isLoading || isRefetching,
+    hasNextPage: !!hasNextPage,
+    onLoadMore: () => void fetchNextPage(),
+    disabled: !!error,
+    rootMargin: "0px 0px 400px 0px",
+  });
 
   return (
     <Flex flexDirection="column" gap={4}>
@@ -92,6 +109,14 @@ export default function Index() {
             <ProductCard key={product.id} product={product} />
           ))}
         </ProductGrid>
+      )}
+
+      {hasNextPage && (
+        <DividerWithContent>
+          <Button type="button" variant="outline" onClick={() => fetchNextPage()} ref={sentryRef}>
+            Load more products
+          </Button>
+        </DividerWithContent>
       )}
     </Flex>
   );

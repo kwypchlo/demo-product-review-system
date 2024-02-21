@@ -30,7 +30,7 @@ export async function insertProduct(product = {}) {
   return result!;
 }
 
-export async function insertReview(productId: string, authorId?: string, overrides = {}) {
+export async function insertReview(productId: number, authorId?: string, overrides = {}) {
   if (!authorId) {
     authorId = (await insertUser()).id;
   }
