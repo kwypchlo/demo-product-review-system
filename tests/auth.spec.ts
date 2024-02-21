@@ -12,6 +12,9 @@ test("should allow signing in and signing out", async ({ page }) => {
   // expect sign out button to not be visible
   await expect(page.getByRole("button", { name: /Sign out/ })).not.toBeVisible();
 
+  // NOTE: when running fresh next dev server, sign in button is not immediately available
+  await page.waitForTimeout(3000);
+
   // sign in as dev
   await page.getByRole("button", { name: "Sign in as Dev" }).click();
 
