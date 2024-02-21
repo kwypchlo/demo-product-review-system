@@ -4,7 +4,7 @@ import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import { execa } from "execa";
 import postgres from "postgres";
 import { generateProduct, generateProductReviews, generateUser } from "./generators";
-import { accounts, products, reviews, sessions, users } from "./schema";
+import { products, reviews, users } from "./schema";
 
 NextEnv.loadEnvConfig(process.cwd(), process.env.NODE_ENV !== "production");
 
