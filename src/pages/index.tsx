@@ -54,7 +54,7 @@ export default function Index() {
       },
       {
         getNextPageParam: ({ nextCursor }) => nextCursor,
-        // placeholderData: true,
+        keepPreviousData: true,
       },
     );
 

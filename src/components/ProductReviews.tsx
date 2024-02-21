@@ -57,7 +57,7 @@ export function ProductReviews({ product }: ProductReviewsProps) {
       { productId: product.id, orderBy: parseOrderBy(orderBy), filterBy: parseFilterBy(filterBy) },
       {
         getNextPageParam: ({ nextCursor }) => nextCursor,
-        // placeholderData: true,
+        keepPreviousData: true,
       },
     );
 

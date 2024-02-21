@@ -114,14 +114,22 @@ export const verificationTokens = createTable(
   }),
 );
 
-export const products = createTable("products", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description").notNull(),
-  rating: doublePrecision("rating").default(0).notNull(),
-  reviewCount: integer("review_count").default(0).notNull(),
-  image: varchar("image", { length: 255 }).notNull(),
-});
+export const products = createTable(
+  "products",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description").notNull(),
+    rating: doublePrecision("rating").default(0).notNull(),
+    reviewCount: integer("review_count").default(0).notNull(),
+    image: varchar("image", { length: 255 }).notNull(),
+  },
+  (products) => ({
+    idxName: index("idx_products_name").on(products.name),
+    idxRating: index("idx_products_rating").on(products.rating),
+    idxReviewCount: index("idx_products_review_count").on(products.reviewCount),
+  }),
+);
 
 export const productsRelations = relations(products, ({ many }) => ({
   reviews: many(reviews),
@@ -142,8 +150,9 @@ export const reviews = createTable(
       .references(() => users.id),
   },
   (reviews) => ({
-    // unique index to ensure that a user can only review a product only once
-    productAuthorUniqueIdx: unique("product_author_unique_idx").on(reviews.productId, reviews.authorId),
+    idxDate: index("idx_reviews_date").on(reviews.date),
+    idxRating: index("idx_reviews_rating").on(reviews.rating),
+    idxProductAuthor: unique("idx_reviews_product_author").on(reviews.productId, reviews.authorId),
   }),
 );
 
