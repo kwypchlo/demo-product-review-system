@@ -2,6 +2,7 @@ import {
   Alert,
   AlertIcon,
   Button,
+  Hide,
   Tab,
   TabList,
   TabPanel,
@@ -60,9 +61,18 @@ export function ProductReviewsWidget({ product }: ProductReviewsWidgetProps) {
           {session.status === "unauthenticated" && (
             <Alert status="info">
               <AlertIcon />
-              <Text mr={3}>You have to be signed in to submit a review</Text>
-              <Button type="button" onClick={() => signIn("github")} ml="auto" size="sm" leftIcon={<SiGithub />}>
-                Sign in with GitHub
+              <Text mr={3} fontSize={[14, 16]}>
+                You have to be signed in to submit a review
+              </Text>
+              <Button
+                type="button"
+                onClick={() => signIn("github")}
+                ml="auto"
+                size="sm"
+                leftIcon={<SiGithub />}
+                flexShrink={0}
+              >
+                Sign in <Hide below="md">with GitHub</Hide>
               </Button>
             </Alert>
           )}
