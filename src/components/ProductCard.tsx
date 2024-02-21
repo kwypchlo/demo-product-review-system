@@ -10,7 +10,7 @@ type ProductCardProps = {
 
 export function ProductCard({ product }: ProductCardProps) {
   return (
-    <Stack spacing={{ base: "4", md: "5" }}>
+    <Stack spacing={{ base: "4", md: "5" }} data-testid="product-card">
       <Box as={Link} href={`/product/${product.id}`}>
         <AspectRatio ratio={4 / 3} borderRadius={{ base: "md", md: "xl" }} overflow="hidden">
           <>
@@ -21,12 +21,18 @@ export function ProductCard({ product }: ProductCardProps) {
       </Box>
       <Stack>
         <Stack spacing="1" as={Link} href={`/product/${product.id}`}>
-          <Text fontWeight="bold">{product.name}</Text>
+          <Text fontWeight="bold" data-testid="product-card-name">
+            {product.name}
+          </Text>
         </Stack>
-        <HStack>
-          <Rating value={product.rating} readOnly style={{ maxWidth: 100 }} />
-          <Text fontSize="sm">{product.reviewCount} Reviews</Text>
-        </HStack>
+        <Stack direction={["column", "row"]}>
+          <Box data-testid="product-card-rating" flexShrink={0}>
+            <Rating value={product.rating} readOnly style={{ maxWidth: 100, marginTop: -1 }} />
+          </Box>
+          <Text fontSize="sm" data-testid="product-card-review-count">
+            {product.reviewCount} Reviews
+          </Text>
+        </Stack>
       </Stack>
     </Stack>
   );

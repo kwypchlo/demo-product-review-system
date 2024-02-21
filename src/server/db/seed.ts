@@ -34,8 +34,11 @@ void (async () => {
   // database setup
   console.log("seed database with data");
 
-  const usersData = new Array(99).fill(null).map(() => generateUser(prevUserData.pop()));
-  usersData.push(generateUser({ id: "test" })); // generate one user with known id for dev authentication
+  const testUser = generateUser({ ...prevUserData.pop(), id: "test" }); // generate one user with known id for dev auth
+  const usersData = new Array(99)
+    .fill(null)
+    .map(() => generateUser(prevUserData.pop()))
+    .concat(testUser);
   const productsData = new Array(300).fill(null).map(() => generateProduct(prevProductData.pop()));
 
   console.log("·", `inserting ${usersData.length} users`);
@@ -47,7 +50,7 @@ void (async () => {
   const reviewsData = productsResp.flatMap((product) =>
     generateProductReviews(
       product.id,
-      usersResp.map(({ id }) => id),
+      usersResp.map(({ id }) => id).filter((id) => id !== testUser.id), // exclude the known user for dev auth
     ),
   );
 

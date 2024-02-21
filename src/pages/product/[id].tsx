@@ -84,7 +84,7 @@ export default function Product() {
         </Box>
 
         <VStack spacing={6} mb={10} alignItems="flex-start">
-          <Heading>{product.name}</Heading>
+          <Heading data-testid="product-name">{product.name}</Heading>
 
           <HStack spacing={4}>
             <Rating value={product.rating} readOnly style={{ maxWidth: 100 }} />
