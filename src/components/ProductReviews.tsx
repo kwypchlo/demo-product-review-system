@@ -1,27 +1,28 @@
 import { Box, Button, Center, Divider, Flex, Select, Spinner } from "@chakra-ui/react";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo } from "react";
 import useInfiniteScroll from "react-infinite-scroll-hook";
 import { DividerWithContent, DividerWithText } from "./Dividers";
 import { Review } from "./Review";
+import { useRouterState } from "@/hooks/useRouterState";
 import { type RouterInputs, type RouterOutputs, api } from "@/utils/api";
 
 const orderByOptions = [
-  { value: "date:desc", label: "Date Desc" },
-  { value: "date:asc", label: "Date Asc" },
-  { value: "rating:desc", label: "Rating Desc" },
-  { value: "rating:asc", label: "Rating Asc" },
+  { value: "date-desc", label: "Date Desc" },
+  { value: "date-asc", label: "Date Asc" },
+  { value: "rating-desc", label: "Rating Desc" },
+  { value: "rating-asc", label: "Rating Asc" },
 ] as const;
 
 const filterByOptions = [
-  { value: "rating:>=:4", label: "Rated 4 or more" },
-  { value: "rating:>=:3", label: "Rated 3 or more" },
-  { value: "rating:<=:3", label: "Rated 3 or less" },
-  { value: "rating:<=:2", label: "Rated 2 or less" },
-  { value: "rating:==:1", label: "Rated ⭐" },
-  { value: "rating:==:2", label: "Rated ⭐⭐" },
-  { value: "rating:==:3", label: "Rated ⭐⭐⭐" },
-  { value: "rating:==:4", label: "Rated ⭐⭐⭐⭐" },
-  { value: "rating:==:5", label: "Rated ⭐⭐⭐⭐⭐" },
+  { value: "rating-gte-4", label: "Rated 4 or more" },
+  { value: "rating-gte-3", label: "Rated 3 or more" },
+  { value: "rating-lte-3", label: "Rated 3 or less" },
+  { value: "rating-lte-2", label: "Rated 2 or less" },
+  { value: "rating-eq-1", label: "Rated ⭐" },
+  { value: "rating-eq-2", label: "Rated ⭐⭐" },
+  { value: "rating-eq-3", label: "Rated ⭐⭐⭐" },
+  { value: "rating-eq-4", label: "Rated ⭐⭐⭐⭐" },
+  { value: "rating-eq-5", label: "Rated ⭐⭐⭐⭐⭐" },
 ] as const;
 
 type ProductReviewsProps = {
@@ -34,23 +35,23 @@ type OrderByInput = RouterInputs["reviews"]["getProductReviews"]["orderBy"];
 type FilterByOption = (typeof filterByOptions)[number]["value"] | "";
 type OrderByOption = (typeof orderByOptions)[number]["value"];
 
-function parseFilterBy(orderBy: FilterByOption): FilterByInput {
-  if (!orderBy) return;
+function parseFilterBy(filterBy: FilterByOption): FilterByInput {
+  if (!filterBy) return;
 
-  const [field, comparison, value] = orderBy.split(":");
+  const [field, comparison, value] = filterBy.split("-");
 
   return { field, comparison, value: parseInt(value!, 10) } as FilterByInput;
 }
 
 function parseOrderBy(orderBy: OrderByOption): OrderByInput {
-  const [field, direction] = orderBy.split(":");
+  const [field, direction] = orderBy.split("-");
 
   return { field, direction } as OrderByInput;
 }
 
 export function ProductReviews({ product }: ProductReviewsProps) {
-  const [filterBy, setFilterBy] = useState<FilterByOption>("");
-  const [orderBy, setOrderBy] = useState<OrderByOption>("date:desc");
+  const [filterBy, setFilterBy] = useRouterState<FilterByOption>("filter", "");
+  const [orderBy, setOrderBy] = useRouterState<OrderByOption>("order", "date-desc");
 
   const { data, error, isLoading, isRefetching, fetchNextPage, hasNextPage } =
     api.reviews.getProductReviewsInfinite.useInfiniteQuery(

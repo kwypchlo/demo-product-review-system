@@ -30,7 +30,7 @@ export const reviewsRouter = createTRPCRouter({
         filterBy: z
           .object({
             field: z.enum(["rating"]),
-            comparison: z.enum([">=", "<=", "=="]),
+            comparison: z.enum(["lte", "gte", "eq"]),
             value: z.number().int().min(1).max(5),
           })
           .optional(),
@@ -54,8 +54,7 @@ export const reviewsRouter = createTRPCRouter({
 
           if (input.filterBy) {
             const { field, comparison, value } = input.filterBy;
-            const cmp = { ">=": gte, "<=": lte, "==": eq }[comparison];
-            return and(where, cmp(reviews[field], value));
+            return and(where, { eq, gte, lte }[comparison](reviews[field], value));
           }
 
           return where;
@@ -84,7 +83,7 @@ export const reviewsRouter = createTRPCRouter({
         filterBy: z
           .object({
             field: z.enum(["rating"]),
-            comparison: z.enum([">=", "<=", "=="]),
+            comparison: z.enum(["lte", "gte", "eq"]),
             value: z.number().int().min(1).max(5),
           })
           .optional(),
@@ -97,10 +96,7 @@ export const reviewsRouter = createTRPCRouter({
           where: input.filterBy
             ? and(
                 eq(reviews.productId, input.productId),
-                { ">=": gte, "<=": lte, "==": eq }[input.filterBy.comparison](
-                  reviews[input.filterBy.field],
-                  input.filterBy.value,
-                ),
+                { eq, gte, lte }[input.filterBy.comparison](reviews[input.filterBy.field], input.filterBy.value),
               )
             : eq(reviews.productId, input.productId),
           cursors: [
