@@ -1,25 +1,27 @@
 import { Button, Center, Flex, Progress, Select } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/router";
+import { useMemo } from "react";
 import useInfiniteScroll from "react-infinite-scroll-hook";
 import { DividerWithContent, DividerWithText } from "@/components/Dividers";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductGrid } from "@/components/ProductGrid";
+import { useRouterState } from "@/hooks/useRouterState";
 import { type RouterInputs, api } from "@/utils/api";
 
 const orderByOptions = [
-  { value: "name:desc", label: "Name Desc" },
-  { value: "name:asc", label: "Name Asc" },
-  { value: "reviewCount:desc", label: "Reviews Desc" },
-  { value: "reviewCount:asc", label: "Reviews Asc" },
-  { value: "rating:desc", label: "Rating Desc" },
-  { value: "rating:asc", label: "Rating Asc" },
+  { value: "name-desc", label: "Name Desc" },
+  { value: "name-asc", label: "Name Asc" },
+  { value: "reviewCount-desc", label: "Reviews Desc" },
+  { value: "reviewCount-asc", label: "Reviews Asc" },
+  { value: "rating-desc", label: "Rating Desc" },
+  { value: "rating-asc", label: "Rating Asc" },
 ] as const;
 
 const filterByOptions = [
-  { value: "rating:>=:4", label: "Rated 4 or more" },
-  { value: "rating:>=:3", label: "Rated 3 or more" },
-  { value: "rating:<=:3", label: "Rated 3 or less" },
-  { value: "rating:<=:2", label: "Rated 2 or less" },
+  { value: "rating-gte-4", label: "Rated 4 or more" },
+  { value: "rating-gte-3", label: "Rated 3 or more" },
+  { value: "rating-lte-3", label: "Rated 3 or less" },
+  { value: "rating-lte-2", label: "Rated 2 or less" },
 ] as const;
 
 type FilterByInput = RouterInputs["products"]["getProducts"]["filterBy"];
@@ -28,23 +30,24 @@ type OrderByInput = RouterInputs["products"]["getProducts"]["orderBy"];
 type FilterByOption = (typeof filterByOptions)[number]["value"] | "";
 type OrderByOption = (typeof orderByOptions)[number]["value"];
 
-function parseFilterBy(orderBy: FilterByOption): FilterByInput {
-  if (!orderBy) return;
+function parseFilterBy(filterBy: FilterByOption): FilterByInput {
+  if (!filterBy) return;
 
-  const [field, comparison, value] = orderBy.split(":");
+  const [field, comparison, value] = filterBy.split("-");
 
   return { field, comparison, value: parseInt(value!, 10) } as FilterByInput;
 }
 
 function parseOrderBy(orderBy: OrderByOption): OrderByInput {
-  const [field, direction] = orderBy.split(":");
+  const [field, direction] = orderBy.split("-");
 
   return { field, direction } as OrderByInput;
 }
 
 export default function Index() {
-  const [filterBy, setFilterBy] = useState<FilterByOption>("");
-  const [orderBy, setOrderBy] = useState<OrderByOption>("name:asc");
+  const router = useRouter();
+  const [filterBy, setFilterBy] = useRouterState<FilterByOption>("filter", "");
+  const [orderBy, setOrderBy] = useRouterState<OrderByOption>("order", "name-asc");
 
   const { data, error, isLoading, isRefetching, fetchNextPage, hasNextPage } =
     api.products.getProductsInfinite.useInfiniteQuery(
@@ -55,6 +58,7 @@ export default function Index() {
       {
         getNextPageParam: ({ nextCursor }) => nextCursor,
         keepPreviousData: true,
+        enabled: router.isReady,
       },
     );
 

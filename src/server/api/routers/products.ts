@@ -15,7 +15,7 @@ export const productsRouter = createTRPCRouter({
         filterBy: z
           .object({
             field: z.enum(["rating"]),
-            comparison: z.enum([">=", "<=", "=="]),
+            comparison: z.enum(["lte", "gte", "eq"]),
             value: z.number().int().min(1).max(5),
           })
           .optional(),
@@ -31,9 +31,8 @@ export const productsRouter = createTRPCRouter({
         where: (products, { gte, lte, eq }) => {
           if (input.filterBy) {
             const { field, comparison, value } = input.filterBy;
-            const cmp = { ">=": gte, "<=": lte, "==": eq }[comparison];
 
-            return cmp(products[field], value);
+            return { gte, lte, eq }[comparison](products[field], value);
           }
         },
       });
@@ -56,7 +55,7 @@ export const productsRouter = createTRPCRouter({
         filterBy: z
           .object({
             field: z.enum(["rating"]),
-            comparison: z.enum([">=", "<=", "=="]),
+            comparison: z.enum(["lte", "gte", "eq"]),
             value: z.number().int().min(1).max(5),
           })
           .optional(),
@@ -67,10 +66,7 @@ export const productsRouter = createTRPCRouter({
         withCursorPagination({
           limit: input.limit,
           where: input.filterBy
-            ? { ">=": gte, "<=": lte, "==": eq }[input.filterBy.comparison](
-                products[input.filterBy.field],
-                input.filterBy.value,
-              )
+            ? { gte, lte, eq }[input.filterBy.comparison](products[input.filterBy.field], input.filterBy.value)
             : undefined,
           cursors: [
             [products[input.orderBy.field], input.orderBy.direction, input.cursor?.orderBy],

@@ -1,27 +1,18 @@
-// function useRouterState<T>(prop: string, defaultValue?: T) {
-//   const [state, setState] = useState<T | undefined>(defaultValue);
-//   const router = useRouter();
-//   const setRouterState = useCallback(
-//     (value: T | undefined) => {
-//       if (value) {
-//         const serialized = JSON.stringify(value);
+import { useRouter } from "next/router";
 
-//         if (serialized !== router.query[prop]) {
-//           router.push({ query: { ...router.query, [prop]: serialized } });
-//         }
-//       } else {
-//         const { [prop]: _, ...query } = router.query;
-//         router.push({ query });
-//       }
-//     },
-//     [router, prop],
-//   );
+export function useRouterState<T extends string>(prop: string, defaultValue?: T): [T, (value: T) => void] {
+  const router = useRouter();
+  const setRouterState = (value: T) => {
+    const { ...query } = router.query;
 
-//   useEffect(() => {
-//     if (router.isReady && JSON.stringify(state) !== router.query[prop]) {
-//       setState(JSON.parse(router.query[prop] as string) as T | undefined);
-//     }
-//   }, [router]);
+    if (value) {
+      query[prop] = value;
+    } else {
+      delete query[prop];
+    }
 
-//   return [state, setRouterState];
-// }
+    void router.replace({ query }, undefined, { scroll: false });
+  };
+
+  return [(router.query[prop] as T) ?? defaultValue, setRouterState];
+}
