@@ -19,7 +19,6 @@ import {
 } from "@chakra-ui/react";
 import { Rating } from "@smastrom/react-rating";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { FiChevronsLeft } from "react-icons/fi";
 import { ProductReviewsWidget } from "@/components/ProductReviewsWidget";
@@ -78,7 +77,7 @@ export default function Product() {
 
       <Flex flex={3} direction="column">
         <Box>
-          <Button as={Link} href="/" leftIcon={<FiChevronsLeft />} variant="link">
+          <Button leftIcon={<FiChevronsLeft />} variant="link" onClick={() => router.back()}>
             Back to products
           </Button>
         </Box>
