@@ -35,8 +35,8 @@ if [ "$DB_PASSWORD" = "password" ]; then
     echo "Please set a password in the .env file and try again"
     exit 1
   fi
-  DB_PASSWORD=$(openssl rand -base64 12)
-  sed -i -e "s/:password@/:$DB_PASSWORD@/" .env
+  DB_PASSWORD=$(openssl rand -base64 12 | tr '+/' '-_')
+  sed -i -e "s#:password@#:$DB_PASSWORD@#" .env
 fi
 
 docker run --name $DB_CONTAINER_NAME -e POSTGRES_PASSWORD=$DB_PASSWORD -e POSTGRES_DB=product-review-system -d -p 5432:5432 docker.io/postgres
